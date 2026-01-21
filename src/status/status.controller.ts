@@ -7,11 +7,11 @@ export class StatusController {
 
   @Get()
   async getHealth() {
-    const db = await this.statusService.checkDatabase();
+    const status = await this.statusService.checkDatabase();
 
     return {
       services: {
-        database: db.database,
+        database: status.database,
       },
     };
   }

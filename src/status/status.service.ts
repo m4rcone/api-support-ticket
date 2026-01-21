@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatabaseService } from 'src/infra/database/database.service';
+import { DatabaseService } from '../infra/database/database.service';
 
 @Injectable()
 export class StatusService {

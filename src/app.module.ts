@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { StatusModule } from './status/status.module';
-import { StatusService } from './status/status.service';
-import { StatusController } from './status/status.controller';
 import { DatabaseModule } from './infra/database/database.module';
-import { DatabaseService } from './infra/database/database.service';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -14,8 +12,9 @@ import { DatabaseService } from './infra/database/database.service';
     }),
     DatabaseModule,
     StatusModule,
+    UsersModule,
   ],
-  controllers: [StatusController],
-  providers: [DatabaseService, StatusService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

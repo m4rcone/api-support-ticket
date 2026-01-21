@@ -8,7 +8,7 @@ export class UsersRepository {
   constructor(private readonly db: DatabaseService) {}
 
   async create(dto: CreateUserDto): Promise<User> {
-    const result = await this.db.query({
+    const result = await this.db.query<User>({
       text: `
         INSERT INTO
           users (name, email, password_hash, role)

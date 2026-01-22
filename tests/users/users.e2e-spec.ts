@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { clearDatabase, closeTestDatabasePool } from '../utils/orchestrator';
 
 describe('POST /users', () => {
   let app: INestApplication;
@@ -15,7 +16,12 @@ describe('POST /users', () => {
     await app.init();
   });
 
+  beforeEach(async () => {
+    await clearDatabase();
+  });
+
   afterAll(async () => {
+    await closeTestDatabasePool();
     await app.close();
   });
 

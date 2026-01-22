@@ -9,12 +9,11 @@ import { UsersModule } from './users/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      cache: true,
     }),
     DatabaseModule,
     StatusModule,
     UsersModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

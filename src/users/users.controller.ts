@@ -1,22 +1,18 @@
-import { Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
-import type { Request } from 'express';
-import { User } from './users.types';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UserResponseDto } from './dtos/user-response.dto';
+import { mapUserToResponseDto } from './users.mapper';
 
 @Controller('users')
 export class UsersController {
-  constructor(readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  createUser(@Req() request: Request): Promise<User> {
-    const data = request.body;
+  @HttpCode(HttpStatus.CREATED)
+  async createUser(@Body() body: CreateUserDto): Promise<UserResponseDto> {
+    const newUser = await this.usersService.createUser(body);
 
-    const createdUser = this.usersService.createUser({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
-
-    return createdUser;
+    return mapUserToResponseDto(newUser);
   }
 }

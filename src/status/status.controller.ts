@@ -6,12 +6,12 @@ export class StatusController {
   constructor(private readonly statusService: StatusService) {}
 
   @Get()
-  async getHealth() {
-    const status = await this.statusService.checkDatabase();
+  async getStatus() {
+    const databaseStatus = await this.statusService.checkDatabase();
 
     return {
       services: {
-        database: status.database,
+        database: databaseStatus,
       },
     };
   }

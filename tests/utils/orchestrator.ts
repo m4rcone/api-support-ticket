@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  application_name: 'api-support-ticket-tests',
 });
 
 export async function clearDatabase() {

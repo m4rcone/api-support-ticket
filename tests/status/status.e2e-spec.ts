@@ -23,12 +23,14 @@ describe('GET /status', () => {
     const response = await request(app.getHttpServer()).get('/status');
 
     expect(response.status).toBe(200);
+
     expect(response.body).toEqual({
       services: {
         database: {
+          status: 'up',
           version: '18.0',
-          max_connections: 100,
-          opened_connections: expect.any(Number),
+          maxConnections: 100,
+          openedConnections: 3,
         },
       },
     });

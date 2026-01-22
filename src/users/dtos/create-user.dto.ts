@@ -1,6 +1,17 @@
-export type CreateUserDto = {
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { UserRole } from '../users.types';
+
+export class CreateUserDto {
+  @IsString()
   name: string;
+
+  @IsEmail()
   email: string;
+
+  @IsString()
   password: string;
-  role?: 'CUSTOMER' | 'AGENT' | 'ADMIN';
-};
+
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+}

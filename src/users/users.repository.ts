@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../infra/database/database.service';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { User } from './users.types';
+import { CreateUserInput, UserRow } from './users.types';
 
 @Injectable()
 export class UsersRepository {
   constructor(private readonly db: DatabaseService) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
-    const result = await this.db.query<User>({
+  async create(input: CreateUserInput): Promise<UserRow> {
+    const result = await this.db.query<UserRow>({
       text: `
         INSERT INTO
           users (name, email, password_hash, role)
@@ -17,7 +16,12 @@ export class UsersRepository {
         RETURNING
           *;
       `,
-      values: [dto.name, dto.email, dto.password, dto.role ?? 'CUSTOMER'],
+      values: [
+        input.name,
+        input.email,
+        input.passwordHash,
+        input.role ?? 'CUSTOMER',
+      ],
     });
 
     return result.rows[0];

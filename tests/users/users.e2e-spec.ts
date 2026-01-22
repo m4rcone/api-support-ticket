@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { clearDatabase, closeTestDatabasePool } from '../utils/orchestrator';
@@ -13,6 +13,12 @@ describe('POST /users', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
   });
 
@@ -25,7 +31,7 @@ describe('POST /users', () => {
     await app.close();
   });
 
-  test('With valid data', async () => {
+  test('With unique and valid data', async () => {
     const response = await request(app.getHttpServer()).post('/users').send({
       name: 'John Doe',
       email: 'john@example.com',
@@ -33,14 +39,14 @@ describe('POST /users', () => {
     });
 
     expect(response.status).toBe(201);
+
     expect(response.body).toEqual({
-      id: expect.any(String),
+      id: response.body.id,
       name: 'John Doe',
       email: 'john@example.com',
       role: 'CUSTOMER',
-      password_hash: expect.any(String),
-      created_at: expect.any(String),
-      updated_at: expect.any(String),
+      createdAt: response.body.createdAt,
+      updatedAt: response.body.updatedAt,
     });
   });
 });

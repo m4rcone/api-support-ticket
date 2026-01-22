@@ -26,4 +26,22 @@ export class UsersRepository {
 
     return result.rows[0];
   }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    const result = await this.db.query<any>({
+      text: `
+      SELECT 
+        email
+      FROM 
+        users
+      WHERE
+        LOWER(email) = LOWER($1)
+      LIMIT
+        1
+      ;`,
+      values: [email],
+    });
+
+    return result.rowCount! > 0;
+  }
 }

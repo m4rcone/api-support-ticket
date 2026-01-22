@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User, UserRole } from './users.types';
+import { ValidationError } from '../infra/errors';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
+    await this.validateUniqueEmail(dto.email);
+
     const passwordHash = dto.password;
 
     const row = await this.usersRepository.create({
@@ -28,5 +31,16 @@ export class UsersService {
     };
 
     return createdUser;
+  }
+
+  private async validateUniqueEmail(email: string): Promise<void> {
+    const exists = await this.usersRepository.existsByEmail(email);
+
+    if (exists) {
+      throw new ValidationError({
+        message: 'O email informado já está sendo utilizado.',
+        action: 'Utilize outro email para realizar a operação.',
+      });
+    }
   }
 }

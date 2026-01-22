@@ -87,7 +87,7 @@ describe('POST /users', () => {
       });
     });
 
-    test('With invalid email format', async () => {
+    test("With invalid 'email' format", async () => {
       const response = await request(app.getHttpServer()).post('/users').send({
         name: 'John Doe',
         email: 'invalid-email-format',
@@ -100,6 +100,29 @@ describe('POST /users', () => {
         name: 'ValidationError',
         message: 'Aconteceu algum erro de validação.',
         action: 'Verifique os dados enviados e tente novamente.',
+        statusCode: 400,
+      });
+    });
+
+    test("With duplicated 'email'", async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'securepassword',
+      });
+
+      const response = await request(app.getHttpServer()).post('/users').send({
+        name: 'John Smith',
+        email: 'john@example.com',
+        password: 'securepassword',
+      });
+
+      expect(response.status).toBe(400);
+
+      expect(response.body).toEqual({
+        name: 'ValidationError',
+        message: 'O email informado já está sendo utilizado.',
+        action: 'Utilize outro email para realizar a operação.',
         statusCode: 400,
       });
     });

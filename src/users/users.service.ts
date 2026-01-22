@@ -3,15 +3,19 @@ import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User, UserRole } from './users.types';
 import { ValidationError } from '../infra/errors';
+import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly passwordHasher: PasswordHasherService,
+  ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
     await this.validateUniqueEmail(dto.email);
 
-    const passwordHash = dto.password;
+    const passwordHash = await this.passwordHasher.hash(dto.password);
 
     const row = await this.usersRepository.create({
       name: dto.name,

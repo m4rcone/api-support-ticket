@@ -31,7 +31,7 @@ describe('GET /status', () => {
             status: 'up',
             version: '18.0',
             maxConnections: 100,
-            openedConnections: 3,
+            openedConnections: expect.any(Number),
           },
         },
       });

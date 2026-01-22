@@ -9,9 +9,11 @@ export class StatusService {
     try {
       const [resultVersion, resultMaxConnections, resultOpenedConnections] =
         await Promise.all([
-          this.db.query('SHOW server_version;'),
-          this.db.query('SHOW max_connections;'),
-          this.db.query({
+          this.db.query<{ server_version: string }>('SHOW server_version;'),
+          this.db.query<{ max_connections: string }>('SHOW max_connections;'),
+          this.db.query<{
+            opened_connections: string;
+          }>({
             text: `
               SELECT COUNT(*)::int AS opened_connections
               FROM pg_stat_activity

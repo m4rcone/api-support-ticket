@@ -6,7 +6,7 @@ export class PasswordHasherService {
   private readonly saltRounds: number;
 
   constructor() {
-    this.saltRounds = process.env.NODE_ENV === 'dev' ? 1 : 14;
+    this.saltRounds = process.env.NODE_ENV === 'production' ? 14 : 1;
   }
 
   async hash(providedPassword: string): Promise<string> {

@@ -8,7 +8,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { InternalServerError, ValidationError } from './errors';
+import {
+  InternalServerError,
+  UnauthorizedError,
+  ValidationError,
+} from './errors';
 import { NotFoundError } from '../infra/errors';
 
 type ErrorResponse = {
@@ -54,6 +58,13 @@ export class HttpErrorHandler implements ExceptionFilter {
     }
 
     if (exception instanceof ValidationError) {
+      status = exception.statusCode;
+      body = exception.toJSON();
+
+      return response.status(status).json(body);
+    }
+
+    if (exception instanceof UnauthorizedError) {
       status = exception.statusCode;
       body = exception.toJSON();
 

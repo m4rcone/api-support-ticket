@@ -4,6 +4,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { User, UserRole } from './users.types';
 import { ValidationError } from '../infra/errors';
 import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
+import { NotFoundError } from '../infra/errors';
 
 @Injectable()
 export class UsersService {
@@ -37,8 +38,31 @@ export class UsersService {
     return createdUser;
   }
 
+  async findOneByEmail(email: string): Promise<User> {
+    const row = await this.usersRepository.findOneByEmail(email);
+
+    if (!row) {
+      throw new NotFoundError({
+        message: 'O email informado não foi encontrado no sistema.',
+        action: 'Verifique o email informado e tente novamente.',
+      });
+    }
+
+    const userFound: User = {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      passwordHash: row.password_hash,
+      role: row.role,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    };
+
+    return userFound;
+  }
+
   private async validateUniqueEmail(email: string): Promise<void> {
-    const exists = await this.usersRepository.existsByEmail(email);
+    const exists = await this.usersRepository.findOneByEmail(email);
 
     if (exists) {
       throw new ValidationError({

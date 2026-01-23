@@ -27,21 +27,25 @@ export class UsersRepository {
     return result.rows[0];
   }
 
-  async existsByEmail(email: string): Promise<boolean> {
-    const result = await this.db.query<any>({
+  async findOneByEmail(email: string): Promise<UserRow | null> {
+    const result = await this.db.query<UserRow>({
       text: `
-      SELECT 
-        email
-      FROM 
-        users
-      WHERE
-        LOWER(email) = LOWER($1)
-      LIMIT
-        1
-      ;`,
+        SELECT
+          *
+        FROM
+          users
+        WHERE
+          LOWER(email) = LOWER($1)
+        LIMIT
+          1
+      `,
       values: [email],
     });
 
-    return result.rowCount! > 0;
+    if (result.rowCount === 0) {
+      return null;
+    }
+
+    return result.rows[0];
   }
 }

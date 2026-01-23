@@ -15,6 +15,7 @@ describe('POST /users', () => {
       }).compile();
 
       app = moduleFixture.createNestApplication();
+      app.setGlobalPrefix('/api/v1');
       app.useGlobalPipes(
         new ValidationPipe({
           whitelist: true,
@@ -35,11 +36,13 @@ describe('POST /users', () => {
     });
 
     test('With unique and valid data', async () => {
-      const response = await request(app.getHttpServer()).post('/users').send({
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'securepassword',
-      });
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users')
+        .send({
+          name: 'John Doe',
+          email: 'john@example.com',
+          password: 'securepassword',
+        });
 
       expect(response.status).toBe(201);
 
@@ -54,10 +57,12 @@ describe('POST /users', () => {
     });
 
     test('With missing data', async () => {
-      const response = await request(app.getHttpServer()).post('/users').send({
-        email: 'john@example.com',
-        password: 'securepassword',
-      });
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users')
+        .send({
+          email: 'john@example.com',
+          password: 'securepassword',
+        });
 
       expect(response.status).toBe(400);
 
@@ -70,12 +75,14 @@ describe('POST /users', () => {
     });
 
     test('With extra fields', async () => {
-      const response = await request(app.getHttpServer()).post('/users').send({
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'securepassword',
-        extraField: 'not allowed',
-      });
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users')
+        .send({
+          name: 'John Doe',
+          email: 'john@example.com',
+          password: 'securepassword',
+          extraField: 'not allowed',
+        });
 
       expect(response.status).toBe(400);
 
@@ -88,11 +95,13 @@ describe('POST /users', () => {
     });
 
     test("With invalid 'email' format", async () => {
-      const response = await request(app.getHttpServer()).post('/users').send({
-        name: 'John Doe',
-        email: 'invalid-email-format',
-        password: 'securepassword',
-      });
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users')
+        .send({
+          name: 'John Doe',
+          email: 'invalid-email-format',
+          password: 'securepassword',
+        });
 
       expect(response.status).toBe(400);
 
@@ -105,17 +114,19 @@ describe('POST /users', () => {
     });
 
     test("With duplicated 'email'", async () => {
-      await request(app.getHttpServer()).post('/users').send({
+      await request(app.getHttpServer()).post('/api/v1/users').send({
         name: 'John Doe',
         email: 'john@example.com',
         password: 'securepassword',
       });
 
-      const response = await request(app.getHttpServer()).post('/users').send({
-        name: 'John Smith',
-        email: 'john@example.com',
-        password: 'securepassword',
-      });
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users')
+        .send({
+          name: 'John Smith',
+          email: 'john@example.com',
+          password: 'securepassword',
+        });
 
       expect(response.status).toBe(400);
 

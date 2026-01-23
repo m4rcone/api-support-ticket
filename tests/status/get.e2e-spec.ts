@@ -13,6 +13,7 @@ describe('GET /status', () => {
       }).compile();
 
       app = moduleFixture.createNestApplication();
+      app.setGlobalPrefix('api/v1');
       await app.init();
     });
 
@@ -21,7 +22,7 @@ describe('GET /status', () => {
     });
 
     test('Retrieving current system status', async () => {
-      const response = await request(app.getHttpServer()).get('/status');
+      const response = await request(app.getHttpServer()).get('/api/v1/status');
 
       expect(response.status).toBe(200);
 

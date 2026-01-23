@@ -5,7 +5,7 @@ import request from 'supertest';
 import { HttpErrorHandler } from '../../../src/infra/http-error-handler';
 import { clearDatabase, closeTestDatabasePool } from '../../utils/orchestrator';
 
-describe('POST /auth/login', () => {
+describe('POST /api/v1/auth/login', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -14,6 +14,7 @@ describe('POST /auth/login', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('/api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -35,14 +36,14 @@ describe('POST /auth/login', () => {
 
   describe('Anonymous user', () => {
     test("With correct 'email' and correct 'password'", async () => {
-      await request(app.getHttpServer()).post('/users').send({
+      await request(app.getHttpServer()).post('/api/v1/users').send({
         name: 'John Doe',
         email: 'john@example.com',
         password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'john@example.com',
           password: 'securepassword',
@@ -52,14 +53,14 @@ describe('POST /auth/login', () => {
     });
 
     test("With correct 'email' but incorrect 'password'", async () => {
-      await request(app.getHttpServer()).post('/users').send({
+      await request(app.getHttpServer()).post('/api/v1/users').send({
         name: 'John Doe',
         email: 'john@example.com',
         password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'john@example.com',
           password: 'incorrectpassword',
@@ -76,14 +77,14 @@ describe('POST /auth/login', () => {
     });
 
     test("With correct 'password' but incorrect 'email'", async () => {
-      await request(app.getHttpServer()).post('/users').send({
+      await request(app.getHttpServer()).post('/api/v1/users').send({
         name: 'John Doe',
         email: 'john@example.com',
         password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'incorrect@example.com',
           password: 'securepassword',
@@ -100,14 +101,14 @@ describe('POST /auth/login', () => {
     });
 
     test("With incorrect 'email' and incorrect 'password'", async () => {
-      await request(app.getHttpServer()).post('/users').send({
+      await request(app.getHttpServer()).post('/api/v1/users').send({
         name: 'John Doe',
         email: 'john@example.com',
         password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'incorrect@example.com',
           password: 'incorrectpassword',
@@ -124,14 +125,14 @@ describe('POST /auth/login', () => {
     });
 
     test('With missing data', async () => {
-      await request(app.getHttpServer()).post('/users').send({
+      await request(app.getHttpServer()).post('/api/v1/users').send({
         name: 'John Doe',
         email: 'john@example.com',
         password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'john@example.com',
         });

@@ -13,6 +13,7 @@
     "services:stop": "docker-compose stop",
     "services:down": "docker-compose down",
     "services:wait:db": "node src/infra/scripts/wait-for-postgres.ts",
+    "db:seed:admin": "ts-node src/infra/scripts/seed-admin.ts",
     "migrations:create": "node-pg-migrate --migrations-dir src/infra/database/migrations -j ts create",
     "migrations:up": "node-pg-migrate --migrations-dir src/infra/database/migrations -j ts up",
     "test": "npm run services:up && npm run services:wait:db && npm run migrations:up && jest --config ./tests/jest-e2e.json --detectOpenHandles",

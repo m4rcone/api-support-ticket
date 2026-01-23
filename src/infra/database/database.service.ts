@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import { ConfigService } from '@nestjs/config';
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import type { QueryConfig, QueryResult, QueryResultRow } from 'pg';
 
@@ -7,8 +6,8 @@ import type { QueryConfig, QueryResult, QueryResultRow } from 'pg';
 export class DatabaseService implements OnModuleDestroy {
   private readonly pool: Pool;
 
-  constructor(private readonly config: ConfigService) {
-    const connectionString = this.config.get<string>('DATABASE_URL');
+  constructor() {
+    const connectionString = process.env.DATABASE_URL;
 
     if (!connectionString) {
       throw new Error('DATABASE_URL is not defined');

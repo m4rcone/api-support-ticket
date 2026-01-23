@@ -1,9 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../../src/app.module';
-import { clearDatabase, closeTestDatabasePool } from '../utils/orchestrator';
-import { HttpErrorHandler } from '../../src/infra/http-error-handler';
+import { AppModule } from '../../../../src/app.module';
+import {
+  clearDatabase,
+  closeTestDatabasePool,
+} from '../../../utils/orchestrator';
+import { HttpErrorHandler } from '../../../../src/infra/http-error-handler';
 
 describe('POST /users', () => {
   describe('Anonymous user', () => {

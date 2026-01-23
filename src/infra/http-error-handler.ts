@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -53,6 +54,15 @@ export class HttpErrorHandler implements ExceptionFilter {
 
       status = exception.getStatus();
       body = notFoundError.toJSON();
+
+      return response.status(status).json(body);
+    }
+
+    if (exception instanceof UnauthorizedException) {
+      const unauthorizedError = new UnauthorizedError({});
+
+      status = exception.getStatus();
+      body = unauthorizedError.toJSON();
 
       return response.status(status).json(body);
     }

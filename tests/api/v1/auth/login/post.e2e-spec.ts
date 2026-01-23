@@ -1,9 +1,12 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
-import { AppModule } from '../../../src/app.module';
 import request from 'supertest';
-import { HttpErrorHandler } from '../../../src/infra/http-error-handler';
-import { clearDatabase, closeTestDatabasePool } from '../../utils/orchestrator';
+import { HttpErrorHandler } from '../../../../../src/infra/http-error-handler';
+import { AppModule } from '../../../../../src/app.module';
+import {
+  clearDatabase,
+  closeTestDatabasePool,
+} from '../../../../utils/orchestrator';
 
 describe('POST /api/v1/auth/login', () => {
   let app: INestApplication;
@@ -14,6 +17,7 @@ describe('POST /api/v1/auth/login', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
     app.setGlobalPrefix('/api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
@@ -50,6 +54,15 @@ describe('POST /api/v1/auth/login', () => {
         });
 
       expect(response.status).toBe(200);
+
+      const setCookie = response.headers['set-cookie'];
+
+      expect(setCookie).toBeDefined();
+      expect(setCookie[0]).toContain('accessToken=');
+      expect(setCookie[0]).toContain('HttpOnly');
+      expect(setCookie[0]).toContain('Path=/');
+      expect(setCookie[0]).toContain('Max-Age=');
+      expect(setCookie[0]).toContain('SameSite=Lax');
     });
 
     test("With correct 'email' but incorrect 'password'", async () => {

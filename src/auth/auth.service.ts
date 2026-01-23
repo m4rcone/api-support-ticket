@@ -3,11 +3,13 @@ import { UsersService } from '../users/users.service';
 import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
 import { User } from '../users/users.types';
 import { NotFoundError, UnauthorizedError } from '../infra/errors';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
     private readonly passwordHasherService: PasswordHasherService,
   ) {}
 
@@ -38,5 +40,13 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  login(user: User) {
+    const payload = { sub: user.id };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+    };
   }
 }

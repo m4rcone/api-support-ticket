@@ -159,3 +159,36 @@ export class MethodNotAllowedError extends Error {
     };
   }
 }
+
+export class ForbiddenError extends Error {
+  action: string;
+  statusCode: number;
+
+  constructor({
+    cause,
+    message,
+    action,
+  }: {
+    cause?: Error;
+    message?: string;
+    action?: string;
+  }) {
+    super(message || 'Você não tem permissão para acessar este recurso.', {
+      cause,
+    });
+    this.name = 'ForbiddenError';
+    this.action =
+      action ||
+      'Verifique se sua conta possui as permissões necessárias para realizar esta ação.';
+    this.statusCode = 403;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      statusCode: this.statusCode,
+    };
+  }
+}

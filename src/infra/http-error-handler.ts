@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
+  ForbiddenError,
   InternalServerError,
   UnauthorizedError,
   ValidationError,
@@ -75,6 +76,13 @@ export class HttpErrorHandler implements ExceptionFilter {
     }
 
     if (exception instanceof UnauthorizedError) {
+      status = exception.statusCode;
+      body = exception.toJSON();
+
+      return response.status(status).json(body);
+    }
+
+    if (exception instanceof ForbiddenError) {
       status = exception.statusCode;
       body = exception.toJSON();
 

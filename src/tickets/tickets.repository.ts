@@ -42,4 +42,23 @@ export class TicketsRepository {
 
     return result.rows[0];
   }
+
+  async updateAssignedTo(id: string, agentId: string): Promise<TicketRow> {
+    const result = await this.db.query<TicketRow>({
+      text: `
+        UPDATE
+          tickets
+        SET
+          assigned_to = $2,
+          updated_at = now()
+        WHERE
+          id = $1
+        RETURNING
+          *
+      `,
+      values: [id, agentId],
+    });
+
+    return result.rows[0];
+  }
 }

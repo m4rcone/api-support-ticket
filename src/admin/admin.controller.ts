@@ -16,11 +16,17 @@ import { UpdateRoleDto } from './dtos/update-role.dto';
 import { UsersService } from '../users/users.service';
 import { UserResponseDto } from '../users/dtos/user-response.dto';
 import { mapUserToResponseDto } from '../users/users.mapper';
+import { AssignTicketDto } from './dtos/assign-ticket.dto';
+import { TicketsService } from '../tickets/tickets.service';
+import { TicketResponseDto } from '../tickets/dtos/ticket-response.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly ticketsService: TicketsService,
+  ) {}
 
   @Get()
   @Roles(UserRole.ADMIN)
@@ -38,5 +44,17 @@ export class AdminController {
     const user = await this.usersService.updateRole(id, body.role);
 
     return mapUserToResponseDto(user);
+  }
+
+  @Patch('tickets/:id/assign')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.ADMIN)
+  async AssignTicket(
+    @Param('id') id: string,
+    @Body() body: AssignTicketDto,
+  ): Promise<TicketResponseDto> {
+    const ticket = await this.ticketsService.assignTicket(id, body.agentId);
+
+    return ticket;
   }
 }

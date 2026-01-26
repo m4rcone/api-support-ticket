@@ -52,7 +52,6 @@ export class TicketsService {
     };
 
     if (user.role === UserRole.CUSTOMER && ticketFound.createdBy !== user.sub) {
-      console.log('PRIMEIRO IF');
       throw new ForbiddenError({});
     }
 
@@ -65,5 +64,35 @@ export class TicketsService {
     }
 
     return ticketFound;
+  }
+
+  async assignTicket(id: string, agentId: string): Promise<Ticket> {
+    const ticketFound = await this.ticketsRepository.findOneById(id);
+
+    if (!ticketFound) {
+      throw new NotFoundError({
+        message: 'O id informado não foi encontrado no sistema.',
+        action: 'Verifique o id informado e tente novamente.',
+      });
+    }
+
+    const row = await this.ticketsRepository.updateAssignedTo(
+      ticketFound.id,
+      agentId,
+    );
+
+    const updatedTicket: Ticket = {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      status: row.status,
+      tag: row.tag,
+      createdBy: row.created_by,
+      assignedTo: row.assigned_to,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    };
+
+    return updatedTicket;
   }
 }

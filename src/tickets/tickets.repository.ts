@@ -21,4 +21,25 @@ export class TicketsRepository {
 
     return result.rows[0];
   }
+
+  async findOneById(id: string): Promise<TicketRow | null> {
+    const result = await this.db.query<TicketRow>({
+      text: `
+        SELECT
+          *
+        FROM
+          tickets
+        WHERE
+          id = $1
+        LIMIT 1
+      `,
+      values: [id],
+    });
+
+    if (result.rowCount === 0) {
+      return null;
+    }
+
+    return result.rows[0];
+  }
 }

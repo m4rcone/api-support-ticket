@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -34,5 +36,13 @@ export class TicketsController {
     });
 
     return mapTicketToResponseDto(newTicket);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getTicket(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    const ticketFound = await this.ticketsService.findOneById(id, req.user);
+
+    return mapTicketToResponseDto(ticketFound);
   }
 }

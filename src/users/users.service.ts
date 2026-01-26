@@ -22,7 +22,6 @@ export class UsersService {
       name: dto.name,
       email: dto.email,
       passwordHash,
-      role: UserRole.CUSTOMER,
     });
 
     const createdUser: User = {

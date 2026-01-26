@@ -147,15 +147,13 @@ describe('POST /api/v1/users', () => {
           role: UserRole.ADMIN,
         });
 
-      expect(response.status).toBe(201);
+      expect(response.status).toBe(400);
 
       expect(response.body).toEqual({
-        id: response.body.id,
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: UserRole.CUSTOMER,
-        createdAt: response.body.createdAt,
-        updatedAt: response.body.updatedAt,
+        name: 'ValidationError',
+        message: 'Aconteceu algum erro de validação.',
+        action: 'Verifique os dados enviados e tente novamente.',
+        statusCode: 400,
       });
     });
 
@@ -200,28 +198,6 @@ describe('POST /api/v1/users', () => {
         message: 'O email informado já está sendo utilizado.',
         action: 'Utilize outro email para realizar a operação.',
         statusCode: 400,
-      });
-    });
-
-    test('Submits with an explicit role field', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/api/v1/users')
-        .send({
-          name: 'John Doe',
-          email: 'john@example.com',
-          password: 'securepassword',
-          role: UserRole.ADMIN,
-        });
-
-      expect(response.status).toBe(201);
-
-      expect(response.body).toEqual({
-        id: response.body.id,
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: UserRole.CUSTOMER,
-        createdAt: response.body.createdAt,
-        updatedAt: response.body.updatedAt,
       });
     });
   });

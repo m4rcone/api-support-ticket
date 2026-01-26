@@ -3,7 +3,7 @@ import { MigrationBuilder } from 'node-pg-migrate';
 export function up(pgm: MigrationBuilder): void {
   pgm.createType('ticket_status', [
     'OPEN',
-    'IN_PROGRESS',
+    'IN PROGRESS',
     'RESOLVED',
     'CLOSED',
   ]);

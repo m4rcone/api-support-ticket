@@ -99,6 +99,7 @@ describe('POST /api/v1/tickets', () => {
         status: TicketStatus.OPEN,
         tag: TicketTag.BUG,
         createdBy: createdUser.id,
+        assignedTo: null,
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
       });

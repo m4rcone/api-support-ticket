@@ -7,7 +7,7 @@ export class TicketResponseDto {
   status: TicketStatus;
   tag: TicketTag;
   createdBy: string;
-  assignedTo: string | undefined;
-  createdAt: string;
-  updatedAt: string;
+  assignedTo: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }

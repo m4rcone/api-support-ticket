@@ -18,7 +18,7 @@ export type TicketRow = {
   status: TicketStatus;
   tag: TicketTag;
   created_by: string;
-  assigned_to: string | undefined;
+  assigned_to: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -30,9 +30,9 @@ export type Ticket = {
   status: TicketStatus;
   tag: TicketTag;
   createdBy: string;
-  assignedTo: string | undefined;
-  createdAt: string;
-  updatedAt: string;
+  assignedTo: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type CreateTicketInput = {

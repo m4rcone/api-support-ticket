@@ -96,7 +96,6 @@ describe('PATCH /admin/users/:id/role', () => {
       await orchestrator.createUser({
         email: 'john@example.com',
         password: 'securepassword',
-        role: UserRole.AGENT,
       });
 
       const authResponse = await request(app.getHttpServer())
@@ -172,9 +171,7 @@ describe('PATCH /admin/users/:id/role', () => {
     });
 
     test('Changes their own role when there is another admin', async () => {
-      const createdDefaultUser = await orchestrator.createUser({
-        role: UserRole.ADMIN,
-      });
+      const createdDefaultUser = await orchestrator.createUser({});
 
       await orchestrator.createAdminUser({
         name: 'Admin',

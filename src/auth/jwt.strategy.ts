@@ -17,9 +17,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-cookie') {
   }
 
   validate(payload: { sub: string; role: UserRole }): {
-    userId: string;
+    sub: string;
     role: UserRole;
   } {
-    return { userId: payload.sub, role: payload.role };
+    return { sub: payload.sub, role: payload.role };
   }
 }

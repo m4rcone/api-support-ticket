@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User, UserRole } from './users.types';
-import { ValidationError } from '../infra/errors';
+import { ForbiddenError, ValidationError } from '../infra/errors';
 import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
 import { NotFoundError } from '../infra/errors';
 
@@ -22,7 +22,7 @@ export class UsersService {
       name: dto.name,
       email: dto.email,
       passwordHash,
-      role: dto.role ?? UserRole.CUSTOMER,
+      role: UserRole.CUSTOMER,
     });
 
     const createdUser: User = {
@@ -59,6 +59,61 @@ export class UsersService {
     };
 
     return userFound;
+  }
+
+  async findOneById(id: string): Promise<User> {
+    const row = await this.usersRepository.findOneById(id);
+
+    if (!row) {
+      throw new NotFoundError({
+        message: 'O id informado não foi encontrado no sistema.',
+        action: 'Verifique o id informado e tente novamente.',
+      });
+    }
+
+    const userFound: User = {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      passwordHash: row.password_hash,
+      role: row.role,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    };
+
+    return userFound;
+  }
+
+  async updateRole(id: string, role: UserRole): Promise<User> {
+    const currentUser = await this.findOneById(id);
+
+    const isChangingAdmin =
+      currentUser.role === UserRole.ADMIN && role !== UserRole.ADMIN;
+
+    if (isChangingAdmin) {
+      const adminsCount = await this.usersRepository.countAdmins();
+
+      if (adminsCount <= 1) {
+        throw new ForbiddenError({
+          message: 'Não é permitido remover o último administrador do sistema.',
+          action: 'Crie outro usuário ADMIN antes de alterar esta role.',
+        });
+      }
+    }
+
+    const row = await this.usersRepository.updateRole(id, role);
+
+    const updatedUser: User = {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      passwordHash: row.password_hash,
+      role: row.role,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    };
+
+    return updatedUser;
   }
 
   private async validateUniqueEmail(email: string): Promise<void> {

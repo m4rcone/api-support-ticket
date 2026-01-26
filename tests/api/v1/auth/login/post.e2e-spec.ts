@@ -3,10 +3,7 @@ import { TestingModule, Test } from '@nestjs/testing';
 import request from 'supertest';
 import { HttpErrorHandler } from '../../../../../src/infra/http-error-handler';
 import { AppModule } from '../../../../../src/app.module';
-import {
-  clearDatabase,
-  closeTestDatabasePool,
-} from '../../../../utils/orchestrator';
+import orchestrator from '../../../../utils/orchestrator';
 
 describe('POST /api/v1/auth/login', () => {
   let app: INestApplication;
@@ -30,18 +27,16 @@ describe('POST /api/v1/auth/login', () => {
   });
 
   beforeEach(async () => {
-    await clearDatabase();
+    await orchestrator.clearDatabase();
   });
 
   afterAll(async () => {
-    await closeTestDatabasePool();
     await app.close();
   });
 
   describe('Anonymous user', () => {
     test("With correct 'email' and correct 'password'", async () => {
-      await request(app.getHttpServer()).post('/api/v1/users').send({
-        name: 'John Doe',
+      await orchestrator.createUser({
         email: 'john@example.com',
         password: 'securepassword',
       });
@@ -66,8 +61,7 @@ describe('POST /api/v1/auth/login', () => {
     });
 
     test("With correct 'email' but incorrect 'password'", async () => {
-      await request(app.getHttpServer()).post('/api/v1/users').send({
-        name: 'John Doe',
+      await orchestrator.createUser({
         email: 'john@example.com',
         password: 'securepassword',
       });
@@ -90,8 +84,7 @@ describe('POST /api/v1/auth/login', () => {
     });
 
     test("With correct 'password' but incorrect 'email'", async () => {
-      await request(app.getHttpServer()).post('/api/v1/users').send({
-        name: 'John Doe',
+      await orchestrator.createUser({
         email: 'john@example.com',
         password: 'securepassword',
       });
@@ -114,8 +107,7 @@ describe('POST /api/v1/auth/login', () => {
     });
 
     test("With incorrect 'email' and incorrect 'password'", async () => {
-      await request(app.getHttpServer()).post('/api/v1/users').send({
-        name: 'John Doe',
+      await orchestrator.createUser({
         email: 'john@example.com',
         password: 'securepassword',
       });
@@ -138,8 +130,7 @@ describe('POST /api/v1/auth/login', () => {
     });
 
     test('With missing data', async () => {
-      await request(app.getHttpServer()).post('/api/v1/users').send({
-        name: 'John Doe',
+      await orchestrator.createUser({
         email: 'john@example.com',
         password: 'securepassword',
       });

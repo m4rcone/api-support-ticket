@@ -89,6 +89,13 @@ export class HttpErrorHandler implements ExceptionFilter {
       return response.status(status).json(body);
     }
 
+    if (exception instanceof NotFoundError) {
+      status = exception.statusCode;
+      body = exception.toJSON();
+
+      return response.status(status).json(body);
+    }
+
     const publicErrorObject = new InternalServerError({
       cause: exception as Error,
     });

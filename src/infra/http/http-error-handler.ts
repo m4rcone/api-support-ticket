@@ -14,8 +14,8 @@ import {
   InternalServerError,
   UnauthorizedError,
   ValidationError,
-} from './errors';
-import { NotFoundError } from '../infra/errors';
+} from '../errors';
+import { NotFoundError } from '../errors';
 
 type ErrorResponse = {
   name: string;

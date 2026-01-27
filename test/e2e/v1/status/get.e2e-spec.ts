@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { DatabaseService } from 'src/infra/database/database.service';
-import orchestrator from 'tests/utils/orchestrator';
+import orchestrator from 'test/utils/orchestrator';
 
 describe('GET /status', () => {
   let app: INestApplication;

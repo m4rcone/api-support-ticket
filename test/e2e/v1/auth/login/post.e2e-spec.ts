@@ -1,9 +1,9 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
 import request from 'supertest';
-import { HttpErrorHandler } from 'src/infra/http-error-handler';
+import { HttpErrorHandler } from 'src/infra/http/http-error-handler';
 import { AppModule } from 'src/app.module';
-import orchestrator from 'tests/utils/orchestrator';
+import orchestrator from 'test/utils/orchestrator';
 import { DatabaseService } from 'src/infra/database/database.service';
 
 describe('POST /api/v1/auth/login', () => {

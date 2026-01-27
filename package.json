@@ -16,9 +16,8 @@
     "db:seed:admin": "ts-node src/infra/scripts/seed-admin.ts",
     "migrations:create": "node-pg-migrate --migrations-dir src/infra/database/migrations -j ts create",
     "migrations:up": "node-pg-migrate --migrations-dir src/infra/database/migrations -j ts up",
-    "test": "npm run services:up && npm run services:wait:db && npm run migrations:up && jest --config ./tests/jest-e2e.json --detectOpenHandles",
-    "test:watch": "jest --config ./tests/jest-e2e.json --watchAll --verbose --detectOpenHandles",
-    "test:cov": "jest --config ./tests/jest-e2e.json --coverage",
+    "test": "npm run services:up && npm run services:wait:db && npm run migrations:up && jest --config ./test/jest-e2e.json --detectOpenHandles",
+    "test:watch": "jest --config ./test/jest-e2e.json --watchAll --verbose --detectOpenHandles",
     "format": "prettier --write .",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   },

@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
-import orchestrator from 'tests/utils/orchestrator';
-import { HttpErrorHandler } from 'src/infra/http-error-handler';
+import orchestrator from 'test/utils/orchestrator';
+import { HttpErrorHandler } from 'src/infra/http/http-error-handler';
 import { UserRole } from 'src/users/users.types';
 import { DatabaseService } from 'src/infra/database/database.service';
 

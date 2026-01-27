@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { HttpErrorHandler } from './infra/http-error-handler';
+import { HttpErrorHandler } from './infra/http/http-error-handler';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {

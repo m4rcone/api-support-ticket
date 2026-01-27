@@ -1,98 +1,313 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🎫 Support Ticket API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST para sistema de gerenciamento de tickets de suporte, desenvolvida com NestJS, TypeScript e PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📋 Sobre o Projeto
 
-## Description
+Sistema completo de gerenciamento de tickets de suporte com autenticação JWT, autorização baseada em roles (RBAC) e funcionalidades específicas para diferentes tipos de usuários.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Funcionalidades Principais
 
-## Project setup
+- ✅ **Autenticação JWT** com cookies HTTP-only
+- 👥 **3 tipos de usuários**: Customer, Agent, Admin
+- 🎫 **Gestão completa de tickets** (criar, listar, atribuir, filtrar)
+- 🔐 **Autorização baseada em roles** (RBAC)
+- 🏷️ **Tags e status de tickets** (Bug, Feature, Question, Improvement)
+- 📊 **Health check** da aplicação
+- 🔒 **Segurança**: bcrypt para senhas, validação de dados, proteção contra ataques
 
-```bash
-$ npm install
+### Roles e Permissões
+
+| Role     | Permissões                                                  |
+| -------- | ----------------------------------------------------------- |
+| CUSTOMER | Criar tickets, visualizar seus próprios tickets             |
+| AGENT    | Visualizar tickets atribuídos, atualizar status             |
+| ADMIN    | Todas as permissões + atribuir tickets + gerenciar usuários |
+
+## 🚀 Tecnologias
+
+- **[NestJS](https://nestjs.com/)** - Framework Node.js progressivo
+- **[TypeScript](https://www.typescriptlang.org/)** - Linguagem tipada
+- **[PostgreSQL](https://www.postgresql.org/)** - Banco de dados relacional
+- **[Passport JWT](https://www.passportjs.org/)** - Autenticação
+- **[node-pg-migrate](https://salsita.github.io/node-pg-migrate/)** - Migrations
+- **[Jest](https://jestjs.io/)** - Testes E2E
+- **[Docker Compose](https://docs.docker.com/compose/)** - Containerização
+
+## 📁 Estrutura do Projeto
+
+```
+api-support-ticket/
+├── src/
+│   ├── admin/                   # Módulo de administração
+│   ├── auth/                    # Autenticação e autorização
+│   ├── infra/                   # Infraestrutura
+│   │   ├── crypto/              # Hashing de senhas
+│   │   ├── database/            # Database service e migrations
+│   │   └── scripts/             # Scripts utilitários
+│   ├── status/                  # Health check
+│   ├── tickets/                 # Gestão de tickets
+│   ├── users/                   # Gestão de usuários
+│   ├── app.module.ts
+│   └── main.ts
+├── tests/
+│   ├── api/v1/                  # Testes E2E por endpoint
+│   └── utils/                   # Helpers de teste
+├── compose.yaml                 # Docker Compose config
+└── package.json
 ```
 
-## Compile and run the project
+## 🛠️ Instalação
+
+### Pré-requisitos
+
+- Node.js 18+
+- Docker e Docker Compose
+- npm ou yarn
+
+### Setup
+
+1. **Clone o repositório**
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone <repository-url>
+cd api-support-ticket
 ```
 
-## Run tests
+2. **Instale as dependências**
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+3. **Configure as variáveis de ambiente**
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cp .env.example .env
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Edite o arquivo `.env` conforme necessário:
 
-## Resources
+```env
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=local_user
+POSTGRES_DB=local_db
+POSTGRES_PASSWORD=local_password
+DATABASE_URL=postgres://local_user:local_password@localhost:5432/local_db
 
-Check out a few resources that may come in handy when working with NestJS:
+JWT_SECRET=jwt_secret_key
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+ADMIN_NAME=Admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=admin123
+```
 
-## Support
+4. **Inicie os serviços (PostgreSQL)**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm run services:up
+```
 
-## Stay in touch
+5. **Execute as migrations**
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npm run migrations:up
+```
 
-## License
+6. **Seed do usuário admin (opcional)**
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run db:seed:admin
+```
+
+## 🏃 Executando a Aplicação
+
+### Desenvolvimento
+
+```bash
+npm run start:dev
+```
+
+A aplicação estará disponível em `http://localhost:3000`
+
+### Produção
+
+```bash
+npm run build
+npm run start
+```
+
+## 🧪 Testes
+
+### Executar todos os testes E2E
+
+```bash
+npm test
+```
+
+### Modo watch (desenvolvimento)
+
+```bash
+npm run test:watch
+```
+
+### Coverage
+
+```bash
+npm run test:cov
+```
+
+## 📡 API Endpoints
+
+### Base URL
+
+```
+http://localhost:3000/api/v1
+```
+
+### Autenticação
+
+| Método | Endpoint      | Descrição        | Auth Required |
+| ------ | ------------- | ---------------- | ------------- |
+| POST   | `/auth/login` | Login de usuário | ❌            |
+
+### Usuários
+
+| Método | Endpoint | Descrição          | Auth Required | Roles |
+| ------ | -------- | ------------------ | ------------- | ----- |
+| POST   | `/users` | Criar novo usuário | ❌            | -     |
+
+### Tickets
+
+| Método | Endpoint       | Descrição            | Auth Required | Roles |
+| ------ | -------------- | -------------------- | ------------- | ----- |
+| GET    | `/tickets`     | Listar tickets       | ✅            | All   |
+| POST   | `/tickets`     | Criar ticket         | ✅            | All   |
+| GET    | `/tickets/:id` | Buscar ticket por ID | ✅            | All   |
+
+### Admin
+
+| Método | Endpoint                    | Descrição                 | Auth Required | Roles |
+| ------ | --------------------------- | ------------------------- | ------------- | ----- |
+| PATCH  | `/admin/tickets/:id/assign` | Atribuir ticket a agente  | ✅            | ADMIN |
+| PATCH  | `/admin/users/:id/role`     | Atualizar role de usuário | ✅            | ADMIN |
+
+### Status
+
+| Método | Endpoint  | Descrição    | Auth Required |
+| ------ | --------- | ------------ | ------------- |
+| GET    | `/status` | Health check | ❌            |
+
+## 🗄️ Database Scripts
+
+### Criar nova migration
+
+```bash
+npm run migrations:create <nome-da-migration>
+```
+
+### Executar migrations
+
+```bash
+npm run migrations:up
+```
+
+### Gerenciar serviços Docker
+
+```bash
+# Iniciar PostgreSQL
+npm run services:up
+
+# Parar serviços
+npm run services:stop
+
+# Remover containers
+npm run services:down
+```
+
+## 🔧 Scripts Disponíveis
+
+| Script                  | Descrição                          |
+| ----------------------- | ---------------------------------- |
+| `npm run start:dev`     | Inicia app em modo desenvolvimento |
+| `npm run build`         | Build da aplicação                 |
+| `npm test`              | Executa testes E2E                 |
+| `npm run test:watch`    | Executa testes em modo watch       |
+| `npm run format`        | Formata código com Prettier        |
+| `npm run lint`          | Lint e correção com ESLint         |
+| `npm run db:seed:admin` | Cria usuário admin no banco        |
+
+## 🏗️ Arquitetura
+
+### Padrões Utilizados
+
+- **Modular Architecture** - Separação por features/domínios
+- **Repository Pattern** - Abstração da camada de dados
+- **DTO Pattern** - Validação e transformação de dados
+- **Guard Pattern** - Autenticação e autorização
+- **Mapper Pattern** - Conversão entre tipos de dados
+
+### Validação e Segurança
+
+- ✅ **class-validator** - Validação de DTOs
+- ✅ **class-transformer** - Transformação de dados
+- ✅ **bcryptjs** - Hash seguro de senhas
+- ✅ **Passport JWT** - Tokens seguros
+- ✅ **Cookie HTTP-only** - Proteção contra XSS
+- ✅ **Global Error Handler** - Tratamento centralizado de erros
+
+## 📝 Exemplos de Uso
+
+### Login
+
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "admin123"
+  }'
+```
+
+### Criar Ticket
+
+```bash
+curl -X POST http://localhost:3000/api/v1/tickets \
+  -H "Content-Type: application/json" \
+  -H "Cookie: access_token=<seu-token>" \
+  -d '{
+    "title": "Bug no sistema",
+    "description": "Descrição detalhada do problema",
+    "tag": "BUG"
+  }'
+```
+
+### Listar Tickets com Filtros
+
+```bash
+curl "http://localhost:3000/api/v1/tickets?status=OPEN&tag=BUG&page=1&perPage=10" \
+  -H "Cookie: access_token=<seu-token>"
+```
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Por favor, siga estas etapas:
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença UNLICENSED - veja o arquivo LICENSE para detalhes.
+
+## 👤 Autor
+
+Desenvolvido com ❤️ por [Seu Nome]
+
+---
+
+⭐ Se este projeto foi útil, considere dar uma estrela!

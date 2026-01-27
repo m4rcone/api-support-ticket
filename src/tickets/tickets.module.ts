@@ -9,5 +9,6 @@ import { UsersRepository } from 'src/users/users.repository';
   imports: [DatabaseModule],
   controllers: [TicketsController],
   providers: [TicketsService, TicketsRepository, UsersRepository],
+  exports: [TicketsService],
 })
 export class TicketsModule {}

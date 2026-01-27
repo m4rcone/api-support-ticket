@@ -218,11 +218,7 @@ export class TicketsService {
       throw new ForbiddenError({});
     }
 
-    if (
-      user.role === UserRole.AGENT &&
-      (ticketFound.assignedTo === user.sub ||
-        ticketFound.createdBy === user.sub)
-    ) {
+    if (user.role === UserRole.AGENT && ticketFound.assignedTo !== user.sub) {
       throw new ForbiddenError({});
     }
 

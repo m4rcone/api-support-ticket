@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../infra/database/database.service';
-import { CreateTicketInput, TicketRow } from './tickets.types';
+import {
+  CreateTicketInput,
+  TicketRow,
+  TicketStatus,
+  TicketTag,
+} from './tickets.types';
 
 @Injectable()
 export class TicketsRepository {
@@ -48,6 +53,65 @@ export class TicketsRepository {
     }
 
     return result.rows[0];
+  }
+
+  async findMany(filters: {
+    createdBy?: string;
+    assignedTo?: string;
+    status?: TicketStatus;
+    tag?: TicketTag;
+    limit: number;
+    offset: number;
+  }): Promise<TicketRow[]> {
+    const conditions: string[] = [];
+    const values: any[] = [];
+
+    if (filters.createdBy) {
+      conditions.push(`created_by = $${values.length + 1}`);
+      values.push(filters.createdBy);
+    }
+
+    if (filters.assignedTo) {
+      conditions.push(`assigned_to = $${values.length + 1}`);
+      values.push(filters.assignedTo);
+    }
+
+    if (filters.status) {
+      conditions.push(`status = $${values.length + 1}`);
+      values.push(filters.status);
+    }
+
+    if (filters.tag) {
+      conditions.push(`tag = $${values.length + 1}`);
+      values.push(filters.tag);
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    // pagination sempre no final
+    values.push(filters.limit);
+    const limitIndex = values.length;
+
+    values.push(filters.offset);
+    const offsetIndex = values.length;
+
+    const result = await this.db.query<TicketRow>({
+      text: `
+      SELECT
+        *
+      FROM
+        tickets
+      ${whereClause}
+      ORDER BY
+        created_at DESC
+      LIMIT $${limitIndex}
+      OFFSET $${offsetIndex}
+    `,
+      values,
+    });
+
+    return result.rows;
   }
 
   async updateAssignedTo(id: string, agentId: string): Promise<TicketRow> {

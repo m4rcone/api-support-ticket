@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { TicketResponseDto } from './dtos/ticket-response.dto';
 import { mapTicketToResponseDto } from './tickets.mapper';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
+import { ListTicketsQueryDto } from './dtos/list-tickets-query.dto';
 
 @Controller('tickets')
 @UseGuards(JwtAuthGuard)
@@ -35,6 +37,22 @@ export class TicketsController {
     });
 
     return mapTicketToResponseDto(newTicket);
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async listTickets(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: ListTicketsQueryDto,
+  ): Promise<TicketResponseDto[]> {
+    const tickets = await this.ticketsService.listTicketsForUser(req.user, {
+      status: query.status,
+      tag: query.tag,
+      page: query.page ?? 1,
+      perPage: query.perPage ?? 10,
+    });
+
+    return tickets.map(mapTicketToResponseDto);
   }
 
   @Get(':id')

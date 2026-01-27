@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Ticket, TicketStatus } from './tickets.types';
+import { Ticket, TicketStatus, TicketTag } from './tickets.types';
 import { TicketsRepository } from './tickets.repository';
 import { ForbiddenError, NotFoundError } from '../infra/errors';
 import { UserRole } from '../users/users.types';
@@ -36,6 +36,83 @@ export class TicketsService {
     };
 
     return createdTicket;
+  }
+
+  async listTicketsForUser(
+    user: { sub: string; role: UserRole },
+    params: {
+      status?: TicketStatus;
+      tag?: TicketTag;
+      page: number;
+      perPage: number;
+    },
+  ): Promise<Ticket[]> {
+    const { status, tag, page, perPage } = params;
+    const limit = perPage;
+    const offset = (page - 1) * perPage;
+
+    if (user.role === UserRole.CUSTOMER) {
+      const rows = await this.ticketsRepository.findMany({
+        createdBy: user.sub,
+        status,
+        tag,
+        limit,
+        offset,
+      });
+
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        status: row.status,
+        tag: row.tag,
+        createdBy: row.created_by,
+        assignedTo: row.assigned_to,
+        createdAt: new Date(row.created_at),
+        updatedAt: new Date(row.updated_at),
+      }));
+    }
+
+    if (user.role === UserRole.AGENT) {
+      const rows = await this.ticketsRepository.findMany({
+        assignedTo: user.sub,
+        status,
+        tag,
+        limit,
+        offset,
+      });
+
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        status: row.status,
+        tag: row.tag,
+        createdBy: row.created_by,
+        assignedTo: row.assigned_to,
+        createdAt: new Date(row.created_at),
+        updatedAt: new Date(row.updated_at),
+      }));
+    }
+
+    const rows = await this.ticketsRepository.findMany({
+      status,
+      tag,
+      limit,
+      offset,
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      status: row.status,
+      tag: row.tag,
+      createdBy: row.created_by,
+      assignedTo: row.assigned_to,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    }));
   }
 
   async findOneById(

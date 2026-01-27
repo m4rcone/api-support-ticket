@@ -6,6 +6,7 @@ import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
 import { DatabaseService } from '../infra/database/database.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { TicketsRepository } from '../tickets/tickets.repository';
+import { TicketStatusHistoryRepository } from 'src/tickets/status-history/ticket-status-history.repository';
 
 @Module({
   controllers: [AdminController],
@@ -16,6 +17,7 @@ import { TicketsRepository } from '../tickets/tickets.repository';
     PasswordHasherService,
     TicketsService,
     TicketsRepository,
+    TicketStatusHistoryRepository,
   ],
 })
 export class AdminModule {}

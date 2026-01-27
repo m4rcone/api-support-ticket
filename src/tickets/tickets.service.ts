@@ -5,12 +5,15 @@ import { ForbiddenError, NotFoundError } from '../infra/errors';
 import { UserRole } from '../users/users.types';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
 import { UsersRepository } from 'src/users/users.repository';
+import { TicketStatusHistoryRepository } from './status-history/ticket-status-history.repository';
+import { TicketStatusHistory } from './status-history/ticket-status-history.types';
 
 @Injectable()
 export class TicketsService {
   constructor(
     private readonly ticketsRepository: TicketsRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly ticketStatusHistoryRepository: TicketStatusHistoryRepository,
   ) {}
 
   private ensureValidStatusTransition(
@@ -311,6 +314,13 @@ export class TicketsService {
 
     this.ensureValidStatusTransition(ticket.status, newStatus, user, ticket);
 
+    await this.ticketStatusHistoryRepository.create({
+      ticketId: ticket.id,
+      previousStatus: ticket.status,
+      newStatus,
+      changedBy: user.sub,
+    });
+
     const updatedRow = await this.ticketsRepository.updateStatus(
       ticket.id,
       newStatus,
@@ -329,5 +339,53 @@ export class TicketsService {
     };
 
     return updatedTicket;
+  }
+
+  async listStatusHistory(
+    ticketId: string,
+    user: { sub: string; role: UserRole },
+  ): Promise<TicketStatusHistory[]> {
+    const row = await this.ticketsRepository.findOneById(ticketId);
+
+    if (!row) {
+      throw new NotFoundError({
+        message: 'O id informado não foi encontrado no sistema.',
+        action: 'Verifique o id informado e tente novamente.',
+      });
+    }
+
+    const ticket: Ticket = {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      status: row.status,
+      tag: row.tag,
+      createdBy: row.created_by,
+      assignedTo: row.assigned_to,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    };
+
+    if (user.role === UserRole.CUSTOMER && ticket.createdBy !== user.sub) {
+      throw new ForbiddenError({});
+    }
+
+    if (user.role === UserRole.AGENT && ticket.assignedTo !== user.sub) {
+      throw new ForbiddenError({});
+    }
+
+    const historyRows =
+      await this.ticketStatusHistoryRepository.findManyByTicketId(ticketId); // NEW
+
+    return historyRows.map((historyRow) => {
+      return {
+        id: historyRow.id,
+        ticketId: historyRow.ticket_id,
+        previousStatus: historyRow.previous_status,
+        newStatus: historyRow.new_status,
+        changedBy: historyRow.changed_by,
+        createdAt: new Date(historyRow.created_at),
+      };
+    });
   }
 }

@@ -19,6 +19,8 @@ import { mapTicketToResponseDto } from './tickets.mapper';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import { ListTicketsQueryDto } from './dtos/list-tickets-query.dto';
 import { UpdateTicketStatusDto } from './dtos/update-ticket-status.dto';
+import { TicketStatusHistoryResponseDto } from './status-history/dtos/ticket-status-history-response.dto';
+import { mapTicketStatusHistoryToResponseDto } from './status-history/ticket-status-history.mapper';
 
 @Controller('tickets')
 @UseGuards(JwtAuthGuard)
@@ -79,5 +81,18 @@ export class TicketsController {
     );
 
     return mapTicketToResponseDto(updatedTicket);
+  }
+
+  @Get(':id/status-history')
+  @HttpCode(HttpStatus.OK)
+  async getTicketStatusHistory(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ): Promise<TicketStatusHistoryResponseDto[]> {
+    const user = req.user;
+
+    const history = await this.ticketsService.listStatusHistory(id, user);
+
+    return history.map((item) => mapTicketStatusHistoryToResponseDto(item));
   }
 }

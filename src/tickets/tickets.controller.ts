@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -17,6 +18,7 @@ import { TicketResponseDto } from './dtos/ticket-response.dto';
 import { mapTicketToResponseDto } from './tickets.mapper';
 import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import { ListTicketsQueryDto } from './dtos/list-tickets-query.dto';
+import { UpdateTicketStatusDto } from './dtos/update-ticket-status.dto';
 
 @Controller('tickets')
 @UseGuards(JwtAuthGuard)
@@ -61,5 +63,21 @@ export class TicketsController {
     const ticketFound = await this.ticketsService.findOneById(id, req.user);
 
     return mapTicketToResponseDto(ticketFound);
+  }
+
+  @Patch(':id/status')
+  @HttpCode(HttpStatus.OK)
+  async updateTicketStatus(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() body: UpdateTicketStatusDto,
+  ): Promise<TicketResponseDto> {
+    const updatedTicket = await this.ticketsService.updateStatus(
+      id,
+      body.status,
+      req.user,
+    );
+
+    return mapTicketToResponseDto(updatedTicket);
   }
 }

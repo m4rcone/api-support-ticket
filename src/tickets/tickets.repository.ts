@@ -89,7 +89,6 @@ export class TicketsRepository {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    // pagination sempre no final
     values.push(filters.limit);
     const limitIndex = values.length;
 
@@ -128,6 +127,25 @@ export class TicketsRepository {
           *
       `,
       values: [id, agentId],
+    });
+
+    return result.rows[0];
+  }
+
+  async updateStatus(id: string, status: TicketStatus): Promise<TicketRow> {
+    const result = await this.db.query<TicketRow>({
+      text: `
+        UPDATE
+          tickets
+        SET
+          status = $2,
+          updated_at = now()
+        WHERE
+          id = $1
+        RETURNING
+          *
+      `,
+      values: [id, status],
     });
 
     return result.rows[0];

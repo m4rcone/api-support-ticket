@@ -13,6 +13,80 @@ export class TicketsService {
     private readonly usersRepository: UsersRepository,
   ) {}
 
+  private ensureValidStatusTransition(
+    currentStatus: TicketStatus,
+    newStatus: TicketStatus,
+    user: { sub: string; role: UserRole },
+    ticket: Ticket,
+  ) {
+    if (
+      currentStatus === TicketStatus.CLOSED &&
+      newStatus !== TicketStatus.CLOSED &&
+      user.role !== UserRole.ADMIN
+    ) {
+      throw new ForbiddenError({
+        message:
+          'O status de um ticket fechado só pode ser alterado por um administrador.',
+        action:
+          'Entre em contato com um administrador para reabrir este ticket.',
+      });
+    }
+
+    if (user.role === UserRole.ADMIN) {
+      return;
+    }
+
+    if (user.role === UserRole.CUSTOMER) {
+      const isOwner = ticket.createdBy === user.sub;
+
+      if (!isOwner) {
+        throw new ForbiddenError({});
+      }
+
+      const allowedForCustomer =
+        (currentStatus === TicketStatus.OPEN &&
+          newStatus === TicketStatus.CLOSED) ||
+        (currentStatus === TicketStatus.RESOLVED &&
+          newStatus === TicketStatus.OPEN);
+
+      if (!allowedForCustomer) {
+        throw new ForbiddenError({
+          message:
+            'Você não tem permissão para alterar o status do ticket para este valor.',
+          action:
+            'Verifique o status atual do ticket e as ações permitidas para a sua conta.',
+        });
+      }
+
+      return;
+    }
+
+    if (user.role === UserRole.AGENT) {
+      const isAssigned = ticket.assignedTo === user.sub;
+
+      if (!isAssigned) {
+        throw new ForbiddenError({});
+      }
+
+      const allowedForAgent =
+        (currentStatus === TicketStatus.OPEN &&
+          newStatus === TicketStatus.IN_PROGRESS) ||
+        (currentStatus === TicketStatus.IN_PROGRESS &&
+          newStatus === TicketStatus.RESOLVED) ||
+        (currentStatus === TicketStatus.RESOLVED &&
+          newStatus === TicketStatus.IN_PROGRESS);
+
+      if (!allowedForAgent) {
+        throw new ForbiddenError({
+          message:
+            'Você não tem permissão para alterar o status do ticket para este valor.',
+          action:
+            'Verifique o status atual do ticket e as ações permitidas para a sua conta.',
+        });
+      }
+    }
+  }
+
   async createTicket(userId: string, dto: CreateTicketDto): Promise<Ticket> {
     const row = await this.ticketsRepository.create({
       title: dto.title,
@@ -196,6 +270,66 @@ export class TicketsService {
       assignedTo: row.assigned_to,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
+    };
+
+    return updatedTicket;
+  }
+
+  async updateStatus(
+    id: string,
+    newStatus: TicketStatus,
+    user: { sub: string; role: UserRole },
+  ): Promise<Ticket> {
+    const row = await this.ticketsRepository.findOneById(id);
+
+    if (!row) {
+      throw new NotFoundError({
+        message: 'O id do ticket informado não foi encontrado no sistema.',
+        action: 'Verifique o id informado e tente novamente.',
+      });
+    }
+
+    const ticket: Ticket = {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      status: row.status,
+      tag: row.tag,
+      createdBy: row.created_by,
+      assignedTo: row.assigned_to,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    };
+
+    if (user.role === UserRole.CUSTOMER && ticket.createdBy !== user.sub) {
+      throw new ForbiddenError({});
+    }
+
+    if (user.role === UserRole.AGENT && ticket.assignedTo !== user.sub) {
+      throw new ForbiddenError({});
+    }
+
+    if (ticket.status === newStatus) {
+      return ticket;
+    }
+
+    this.ensureValidStatusTransition(ticket.status, newStatus, user, ticket);
+
+    const updatedRow = await this.ticketsRepository.updateStatus(
+      ticket.id,
+      newStatus,
+    );
+
+    const updatedTicket: Ticket = {
+      id: updatedRow.id,
+      title: updatedRow.title,
+      description: updatedRow.description,
+      status: updatedRow.status,
+      tag: updatedRow.tag,
+      createdBy: updatedRow.created_by,
+      assignedTo: updatedRow.assigned_to,
+      createdAt: new Date(updatedRow.created_at),
+      updatedAt: new Date(updatedRow.updated_at),
     };
 
     return updatedTicket;

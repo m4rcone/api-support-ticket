@@ -38,6 +38,17 @@ export type Ticket = {
 export type CreateTicketInput = {
   title: string;
   description: string;
+  status: TicketStatus;
   tag: TicketTag;
   createdBy: string;
+  assignedTo: string | null;
+};
+
+export type CreateTicketOrchestrator = {
+  title?: string;
+  description?: string;
+  status?: TicketStatus;
+  tag?: TicketTag;
+  createdBy: string;
+  assignedTo?: string | null;
 };

@@ -28,4 +28,12 @@ export type CreateUserInput = {
   name: string;
   email: string;
   passwordHash: string;
+  role: UserRole;
+};
+
+export type CreateUserOrchestrator = {
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: UserRole;
 };

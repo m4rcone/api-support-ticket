@@ -1,14 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../../../../src/app.module';
-import orchestrator from '../../../utils/orchestrator';
-import { HttpErrorHandler } from '../../../../src/infra/http-error-handler';
+import { AppModule } from 'src/app.module';
+import orchestrator from 'tests/utils/orchestrator';
+import { HttpErrorHandler } from 'src/infra/http-error-handler';
 import cookieParser from 'cookie-parser';
-import { TicketStatus, TicketTag } from '../../../../src/tickets/tickets.types';
+import { TicketStatus, TicketTag } from 'src/tickets/tickets.types';
+import { DatabaseService } from 'src/infra/database/database.service';
 
 describe('POST /api/v1/tickets', () => {
   let app: INestApplication;
+  let db: DatabaseService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -16,6 +18,8 @@ describe('POST /api/v1/tickets', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    db = moduleFixture.get(DatabaseService);
+
     app.use(cookieParser());
     app.setGlobalPrefix('/api/v1');
     app.useGlobalPipes(
@@ -25,7 +29,10 @@ describe('POST /api/v1/tickets', () => {
       }),
     );
     app.useGlobalFilters(new HttpErrorHandler());
+
     await app.init();
+
+    orchestrator.setDatabaseService(db);
   });
 
   beforeEach(async () => {
@@ -38,16 +45,14 @@ describe('POST /api/v1/tickets', () => {
 
   describe('Anonymous user', () => {
     test('Submits unique and valid ticket data', async () => {
-      const createdUser = await orchestrator.createUser({});
+      await orchestrator.createUser({});
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/tickets')
         .send({
-          title: 'Ticket Title ',
-          description: 'Ticket description',
-          status: TicketStatus.OPEN,
+          title: 'Title ',
+          description: 'Description',
           tag: TicketTag.BUG,
-          created_by: createdUser.id,
         });
 
       expect(response.status).toBe(401);
@@ -64,15 +69,14 @@ describe('POST /api/v1/tickets', () => {
   describe('Authenticated user', () => {
     test('Submits unique and valid ticket data', async () => {
       const createdUser = await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
+        password: 'securePassword',
       });
 
       const authResponse = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'john@example.com',
-          password: 'securepassword',
+          email: createdUser.email,
+          password: 'securePassword',
         });
 
       expect(authResponse.status).toBe(200);
@@ -85,8 +89,8 @@ describe('POST /api/v1/tickets', () => {
         .post('/api/v1/tickets')
         .set('Cookie', cookies)
         .send({
-          title: 'Ticket Title',
-          description: 'Ticket description',
+          title: 'Title',
+          description: 'Description',
           tag: TicketTag.BUG,
         });
 
@@ -94,8 +98,8 @@ describe('POST /api/v1/tickets', () => {
 
       expect(response.body).toEqual({
         id: response.body.id,
-        title: 'Ticket Title',
-        description: 'Ticket description',
+        title: 'Title',
+        description: 'Description',
         status: TicketStatus.OPEN,
         tag: TicketTag.BUG,
         createdBy: createdUser.id,
@@ -103,19 +107,21 @@ describe('POST /api/v1/tickets', () => {
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
       });
+
+      expect(Date.parse(response.body.createdAt)).not.toBeNaN();
+      expect(Date.parse(response.body.updatedAt)).not.toBeNaN();
     });
 
     test('Submits with missing required fields', async () => {
-      await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
+      const createdUser = await orchestrator.createUser({
+        password: 'securePassword',
       });
 
       const authResponse = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'john@example.com',
-          password: 'securepassword',
+          email: createdUser.email,
+          password: 'securePassword',
         });
 
       expect(authResponse.status).toBe(200);
@@ -128,9 +134,9 @@ describe('POST /api/v1/tickets', () => {
         .post('/api/v1/tickets')
         .set('Cookie', cookies)
         .send({
-          title: 'Ticket Title',
-          description: 'Ticket description',
-          // missing tag
+          title: 'Title',
+          description: 'Description',
+          // tag: TicketTag.BUG, // missing
         });
 
       expect(response.status).toBe(400);
@@ -144,16 +150,15 @@ describe('POST /api/v1/tickets', () => {
     });
 
     test('Submits with extra fields in the body', async () => {
-      await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
+      const createdUser = await orchestrator.createUser({
+        password: 'securePassword',
       });
 
       const authResponse = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'john@example.com',
-          password: 'securepassword',
+          email: createdUser.email,
+          password: 'securePassword',
         });
 
       expect(authResponse.status).toBe(200);
@@ -166,9 +171,9 @@ describe('POST /api/v1/tickets', () => {
         .post('/api/v1/tickets')
         .set('Cookie', cookies)
         .send({
-          title: 'Ticket Title',
-          description: 'Ticket description',
-          tag: TicketTag.FEATURE,
+          title: 'Title',
+          description: 'Description',
+          tag: TicketTag.BUG,
           extraField: 'not allowed',
         });
 

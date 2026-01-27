@@ -10,13 +10,20 @@ export class TicketsRepository {
     const result = await this.db.query<TicketRow>({
       text: `
         INSERT INTO
-          tickets (title, description, tag, created_by)
+          tickets (title, description, status, tag, created_by, assigned_to)
         VALUES
-          ($1, $2, $3, $4)
+          ($1, $2, $3, $4, $5, $6)
         RETURNING
           *;
       `,
-      values: [input.title, input.description, input.tag, input.createdBy],
+      values: [
+        input.title,
+        input.description,
+        input.status,
+        input.tag,
+        input.createdBy,
+        input.assignedTo,
+      ],
     });
 
     return result.rows[0];

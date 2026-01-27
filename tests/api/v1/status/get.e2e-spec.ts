@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../../../../src/app.module';
+import { AppModule } from 'src/app.module';
+import { DatabaseService } from 'src/infra/database/database.service';
+import orchestrator from 'tests/utils/orchestrator';
 
 describe('GET /status', () => {
   let app: INestApplication;
+  let db: DatabaseService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -12,8 +15,13 @@ describe('GET /status', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    db = moduleFixture.get(DatabaseService);
+
     app.setGlobalPrefix('api/v1');
+
     await app.init();
+
+    orchestrator.setDatabaseService(db);
   });
 
   afterAll(async () => {

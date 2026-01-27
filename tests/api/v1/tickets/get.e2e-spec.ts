@@ -1,13 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../../../../src/app.module';
-import orchestrator from '../../../utils/orchestrator';
-import { HttpErrorHandler } from '../../../../src/infra/http-error-handler';
+import { AppModule } from 'src/app.module';
+import orchestrator from 'tests/utils/orchestrator';
+import { HttpErrorHandler } from 'src/infra/http-error-handler';
 import cookieParser from 'cookie-parser';
+import { UserRole } from 'src/users/users.types';
+import { DatabaseService } from 'src/infra/database/database.service';
 
 describe('GET /api/v1/tickets/:id', () => {
   let app: INestApplication;
+  let db: DatabaseService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -15,6 +18,8 @@ describe('GET /api/v1/tickets/:id', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    db = moduleFixture.get(DatabaseService);
+
     app.use(cookieParser());
     app.setGlobalPrefix('/api/v1');
     app.useGlobalPipes(
@@ -24,7 +29,10 @@ describe('GET /api/v1/tickets/:id', () => {
       }),
     );
     app.useGlobalFilters(new HttpErrorHandler());
+
     await app.init();
+
+    orchestrator.setDatabaseService(db);
   });
 
   beforeEach(async () => {
@@ -36,7 +44,7 @@ describe('GET /api/v1/tickets/:id', () => {
   });
 
   describe('Anonymous user', () => {
-    test('Without token', async () => {
+    test('Attempts to retrieve a ticket without access token', async () => {
       const response = await request(app.getHttpServer()).get(
         '/api/v1/tickets/05d01ddc-6a7f-4c53-b3f9-13db57edf2b2',
       );
@@ -53,22 +61,21 @@ describe('GET /api/v1/tickets/:id', () => {
   });
 
   describe('Authenticated customer user', () => {
-    test("With existent ticket 'id'", async () => {
+    test('Attempts to retrieve an existing ticket', async () => {
       const createdUser = await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
+        password: 'securePassword',
       });
 
-      const authResponse = await request(app.getHttpServer())
+      const loginResponse = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'john@example.com',
-          password: 'securepassword',
+          email: createdUser.email,
+          password: 'securePassword',
         });
 
-      expect(authResponse.status).toBe(200);
+      expect(loginResponse.status).toBe(200);
 
-      const cookies = authResponse.headers['set-cookie'];
+      const cookies = loginResponse.headers['set-cookie'];
 
       expect(cookies).toBeDefined();
 
@@ -95,27 +102,22 @@ describe('GET /api/v1/tickets/:id', () => {
       });
     });
 
-    test('With ticket id from another user', async () => {
-      await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
+    test('Attempts to retrieve a ticket from another user', async () => {
+      const createdUser = await orchestrator.createUser({
+        password: 'securePassword',
       });
+      const createdUser2 = await orchestrator.createUser({});
 
-      const createdUser2 = await orchestrator.createUser({
-        email: 'john2@example.com',
-        password: 'securepassword',
-      });
-
-      const authResponse = await request(app.getHttpServer())
+      const loginResponse = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'john@example.com',
-          password: 'securepassword',
+          email: createdUser.email,
+          password: 'securePassword',
         });
 
-      expect(authResponse.status).toBe(200);
+      expect(loginResponse.status).toBe(200);
 
-      const cookies = authResponse.headers['set-cookie'];
+      const cookies = loginResponse.headers['set-cookie'];
 
       expect(cookies).toBeDefined();
 
@@ -140,28 +142,26 @@ describe('GET /api/v1/tickets/:id', () => {
   });
 
   describe('Authenticated admin user', () => {
-    test("With any existent ticket 'id'", async () => {
+    test('Attempts to retrieve an existing ticket', async () => {
       const createdDefaultUser = await orchestrator.createUser({});
       const createdTicket = await orchestrator.createTicket({
         createdBy: createdDefaultUser.id,
       });
-
-      await orchestrator.createAdminUser({
-        name: 'Admin',
-        email: 'admin@example.com',
+      const createdAdminUser = await orchestrator.createUser({
         password: 'admin123',
+        role: UserRole.ADMIN,
       });
 
-      const authResponse = await request(app.getHttpServer())
+      const loginResponse = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'admin@example.com',
+          email: createdAdminUser.email,
           password: 'admin123',
         });
 
-      expect(authResponse.status).toBe(200);
+      expect(loginResponse.status).toBe(200);
 
-      const cookies = authResponse.headers['set-cookie'];
+      const cookies = loginResponse.headers['set-cookie'];
 
       expect(cookies).toBeDefined();
 
@@ -177,30 +177,29 @@ describe('GET /api/v1/tickets/:id', () => {
         description: createdTicket.description,
         status: createdTicket.status,
         tag: createdTicket.tag,
-        createdBy: createdDefaultUser.id,
-        assignedTo: null,
-        createdAt: response.body.createdAt,
-        updatedAt: response.body.updatedAt,
+        createdBy: createdTicket.createdBy,
+        assignedTo: createdTicket.assignedTo,
+        createdAt: createdTicket.createdAt.toISOString(),
+        updatedAt: createdTicket.updatedAt.toISOString(),
       });
     });
 
-    test("With nonexistent ticket 'id'", async () => {
-      await orchestrator.createAdminUser({
-        name: 'Admin',
-        email: 'admin@example.com',
+    test('Attempts to retrieve a nonexistent ticket', async () => {
+      const createdAdminUser = await orchestrator.createUser({
         password: 'admin123',
+        role: UserRole.ADMIN,
       });
 
-      const authResponse = await request(app.getHttpServer())
+      const loginResponse = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'admin@example.com',
+          email: createdAdminUser.email,
           password: 'admin123',
         });
 
-      expect(authResponse.status).toBe(200);
+      expect(loginResponse.status).toBe(200);
 
-      const cookies = authResponse.headers['set-cookie'];
+      const cookies = loginResponse.headers['set-cookie'];
 
       expect(cookies).toBeDefined();
 
@@ -209,6 +208,7 @@ describe('GET /api/v1/tickets/:id', () => {
         .set('Cookie', cookies);
 
       expect(response.status).toBe(404);
+
       expect(response.body).toEqual({
         name: 'NotFoundError',
         message: 'O id informado não foi encontrado no sistema.',

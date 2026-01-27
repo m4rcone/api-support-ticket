@@ -1,47 +1,54 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../../../../src/app.module';
-import orchestrator from '../../../utils/orchestrator';
-import { HttpErrorHandler } from '../../../../src/infra/http-error-handler';
-import { UserRole } from '../../../../src/users/users.types';
+import { AppModule } from 'src/app.module';
+import orchestrator from 'tests/utils/orchestrator';
+import { HttpErrorHandler } from 'src/infra/http-error-handler';
+import { UserRole } from 'src/users/users.types';
+import { DatabaseService } from 'src/infra/database/database.service';
 
 describe('POST /api/v1/users', () => {
+  let app: INestApplication;
+  let db: DatabaseService;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    db = moduleFixture.get(DatabaseService);
+
+    app.setGlobalPrefix('/api/v1');
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
+    app.useGlobalFilters(new HttpErrorHandler());
+
+    await app.init();
+
+    orchestrator.setDatabaseService(db);
+  });
+
+  beforeEach(async () => {
+    await orchestrator.clearDatabase();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
   describe('Anonymous user', () => {
-    let app: INestApplication;
-
-    beforeAll(async () => {
-      const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
-      }).compile();
-
-      app = moduleFixture.createNestApplication();
-      app.setGlobalPrefix('/api/v1');
-      app.useGlobalPipes(
-        new ValidationPipe({
-          whitelist: true,
-          forbidNonWhitelisted: true,
-        }),
-      );
-      app.useGlobalFilters(new HttpErrorHandler());
-      await app.init();
-    });
-
-    beforeEach(async () => {
-      await orchestrator.clearDatabase();
-    });
-
-    afterAll(async () => {
-      await app.close();
-    });
-
     test('Submits unique and valid user data', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/users')
         .send({
           name: 'John Doe',
           email: 'john@example.com',
-          password: 'securepassword',
+          password: 'securePassword',
         });
 
       expect(response.status).toBe(201);
@@ -54,6 +61,9 @@ describe('POST /api/v1/users', () => {
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
       });
+
+      expect(Date.parse(response.body.createdAt)).not.toBeNaN();
+      expect(Date.parse(response.body.updatedAt)).not.toBeNaN();
     });
 
     test('Submits with missing required fields', async () => {
@@ -61,7 +71,7 @@ describe('POST /api/v1/users', () => {
         .post('/api/v1/users')
         .send({
           email: 'john@example.com',
-          password: 'securepassword',
+          password: 'securePassword',
         });
 
       expect(response.status).toBe(400);
@@ -80,7 +90,7 @@ describe('POST /api/v1/users', () => {
         .send({
           name: 'John Doe',
           email: 'john@example.com',
-          password: 'securepassword',
+          password: 'securePassword',
           extraField: 'not allowed',
         });
 
@@ -100,7 +110,7 @@ describe('POST /api/v1/users', () => {
         .send({
           name: 'John Doe',
           email: 'invalid-email-format',
-          password: 'securepassword',
+          password: 'securePassword',
         });
 
       expect(response.status).toBe(400);
@@ -116,15 +126,14 @@ describe('POST /api/v1/users', () => {
     test('Submits with a duplicated email address', async () => {
       await orchestrator.createUser({
         email: 'john@example.com',
-        password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/users')
         .send({
-          name: 'John Smith',
+          name: 'John Doe',
           email: 'john@example.com',
-          password: 'securepassword',
+          password: 'securePassword',
         });
 
       expect(response.status).toBe(400);
@@ -143,7 +152,7 @@ describe('POST /api/v1/users', () => {
         .send({
           name: 'John Doe',
           email: 'john@example.com',
-          password: 'securepassowrd',
+          password: 'securePassword',
           role: UserRole.ADMIN,
         });
 
@@ -178,9 +187,7 @@ describe('POST /api/v1/users', () => {
 
     test('Submits with an email matching an existing one in a different case', async () => {
       await orchestrator.createUser({
-        name: 'John Doe',
         email: 'john@example.com',
-        password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())
@@ -188,7 +195,7 @@ describe('POST /api/v1/users', () => {
         .send({
           name: 'John Doe',
           email: 'JOHN@EXAMPLE.COM',
-          password: 'securepassword',
+          password: 'securePassword',
         });
 
       expect(response.status).toBe(400);

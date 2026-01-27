@@ -1,12 +1,14 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
 import request from 'supertest';
-import { HttpErrorHandler } from '../../../../../src/infra/http-error-handler';
-import { AppModule } from '../../../../../src/app.module';
-import orchestrator from '../../../../utils/orchestrator';
+import { HttpErrorHandler } from 'src/infra/http-error-handler';
+import { AppModule } from 'src/app.module';
+import orchestrator from 'tests/utils/orchestrator';
+import { DatabaseService } from 'src/infra/database/database.service';
 
 describe('POST /api/v1/auth/login', () => {
   let app: INestApplication;
+  let db: DatabaseService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -14,6 +16,7 @@ describe('POST /api/v1/auth/login', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    db = moduleFixture.get(DatabaseService);
 
     app.setGlobalPrefix('/api/v1');
     app.useGlobalPipes(
@@ -23,7 +26,10 @@ describe('POST /api/v1/auth/login', () => {
       }),
     );
     app.useGlobalFilters(new HttpErrorHandler());
+
     await app.init();
+
+    orchestrator.setDatabaseService(db);
   });
 
   beforeEach(async () => {
@@ -36,16 +42,15 @@ describe('POST /api/v1/auth/login', () => {
 
   describe('Anonymous user', () => {
     test("With correct 'email' and correct 'password'", async () => {
-      await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
+      const createdUser = await orchestrator.createUser({
+        password: 'securePassword',
       });
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'john@example.com',
-          password: 'securepassword',
+          email: createdUser.email,
+          password: 'securePassword',
         });
 
       expect(response.status).toBe(200);
@@ -61,16 +66,13 @@ describe('POST /api/v1/auth/login', () => {
     });
 
     test("With correct 'email' but incorrect 'password'", async () => {
-      await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
-      });
+      const createdUser = await orchestrator.createUser({});
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
-          email: 'john@example.com',
-          password: 'incorrectpassword',
+          email: createdUser.email,
+          password: 'incorrectPassword',
         });
 
       expect(response.status).toBe(401);
@@ -85,15 +87,14 @@ describe('POST /api/v1/auth/login', () => {
 
     test("With correct 'password' but incorrect 'email'", async () => {
       await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
+        password: 'securePassword',
       });
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
           email: 'incorrect@example.com',
-          password: 'securepassword',
+          password: 'securePassword',
         });
 
       expect(response.status).toBe(401);
@@ -107,16 +108,13 @@ describe('POST /api/v1/auth/login', () => {
     });
 
     test("With incorrect 'email' and incorrect 'password'", async () => {
-      await orchestrator.createUser({
-        email: 'john@example.com',
-        password: 'securepassword',
-      });
+      await orchestrator.createUser({});
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
           email: 'incorrect@example.com',
-          password: 'incorrectpassword',
+          password: 'incorrectPassword',
         });
 
       expect(response.status).toBe(401);
@@ -132,7 +130,6 @@ describe('POST /api/v1/auth/login', () => {
     test('With missing data', async () => {
       await orchestrator.createUser({
         email: 'john@example.com',
-        password: 'securepassword',
       });
 
       const response = await request(app.getHttpServer())

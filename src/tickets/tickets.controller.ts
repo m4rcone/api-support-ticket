@@ -28,11 +28,10 @@ export class TicketsController {
     @Body() body: CreateTicketDto,
   ): Promise<TicketResponseDto> {
     const userId = req.user['sub'];
-    const newTicket = await this.ticketsService.createTicket({
+    const newTicket = await this.ticketsService.createTicket(userId, {
       title: body.title,
       description: body.description,
       tag: body.tag,
-      createdBy: userId,
     });
 
     return mapTicketToResponseDto(newTicket);

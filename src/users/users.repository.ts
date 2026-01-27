@@ -10,13 +10,13 @@ export class UsersRepository {
     const result = await this.db.query<UserRow>({
       text: `
         INSERT INTO
-          users (name, email, password_hash)
+          users (name, email, password_hash, role)
         VALUES
-          ($1, $2, $3)
+          ($1, $2, $3, $4)
         RETURNING
           *;
       `,
-      values: [input.name, input.email, input.passwordHash],
+      values: [input.name, input.email, input.passwordHash, input.role],
     });
 
     return result.rows[0];

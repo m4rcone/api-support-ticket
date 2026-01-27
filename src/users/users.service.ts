@@ -22,6 +22,7 @@ export class UsersService {
       name: dto.name,
       email: dto.email,
       passwordHash,
+      role: UserRole.CUSTOMER,
     });
 
     const createdUser: User = {
@@ -95,7 +96,7 @@ export class UsersService {
       if (adminsCount <= 1) {
         throw new ForbiddenError({
           message: 'Não é permitido remover o último administrador do sistema.',
-          action: 'Crie outro usuário ADMIN antes de alterar esta role.',
+          action: 'Crie outro ADMIN antes de alterar o papel deste usuário.',
         });
       }
     }

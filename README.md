@@ -1,4 +1,4 @@
-⏱ *Leitura rápida: ~3 min - Leitura completa: ~7 min*
+⏱ *Tempo estimado de leitura: ~7 minutos*
 
 # 🎫 Support Ticket API
 

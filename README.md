@@ -47,7 +47,7 @@ Arquitetura modular, com separação clara entre:
 
 ---
 
-## 👥 Usuários e Papéis (roles)
+## 👥 Usuários e Papéis
 
 ### Criação de usuários
 
@@ -101,7 +101,7 @@ Estados possíveis:
 
 ### Regras de transição
 
-- **CUSTOMER:** pode fechar e reabrir seus próprios tickets (OPEN ↔ CLOSED)
+- **CUSTOMER:** pode fechar e reabrir seus próprios tickets (OPEN → CLOSED, RESOLVED → OPEN)
 - **AGENT:** pode avançar o fluxo de tickets atribuídos (OPEN → IN_PROGRESS → RESOLVED)
 - **ADMIN:** pode alterar qualquer ticket
 
@@ -163,7 +163,9 @@ Exemplos de testes implementados:
 - Proteções contra acesso indevido
 
 São `82` testes E2E no total.
+
 Todos os testes passam isoladamente com banco limpo a cada execução.
+
 Possui um `orchestrator` para gerenciar o banco de dados e facilitar a escrita dos testes.
 
 ---
@@ -180,7 +182,7 @@ Após subir o projeto, acesse: `http://localhost:3000/`
 - Testar endpoints protegidos (cookie é reutilizado automaticamente)
 - Visualizar contratos de request/response
 
-Importante rodar o script `db:seed:admin` para criar um usuário ADMIN inicial e conseguir acessar os endpoints protegidos.
+**Importante:** rodar o script `db:seed:admin` para criar um usuário **ADMIN** inicial e conseguir acessar os endpoints protegidos.
 
 ---
 
@@ -194,8 +196,8 @@ Importante rodar o script `db:seed:admin` para criar um usuário ADMIN inicial e
 ### Subir o projeto
 
 ```bash
-git clone <url-do-repositorio>
-cd <nome-do-projeto>
+git clone https://github.com/m4rcone/api-support-ticket.git
+cd api-support-ticket
 
 cp .env.example .env # ajuste as variáveis de ambiente conforme necessário
 
@@ -203,7 +205,7 @@ npm install
 npm run start:dev
 ```
 
-O script irá subir o serviço (Postgres), aplicar migrations e rodar o servidor em modo `--watch`.
+O script `start:dev` irá subir o serviço `Postgres`, aplicar migrations e rodar o servidor em modo `--watch`.
 
 ### Testes E2E
 
@@ -213,6 +215,7 @@ npm run test
 ```
 
 Recomendo rodar em modo `--watch` para obter detalhe dos testes.
+
 O script `test` está preparado para rodar em CI/CD.
 
 ## 🧠 Objetivo do Projeto

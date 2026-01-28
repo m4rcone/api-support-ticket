@@ -1,3 +1,5 @@
+⏱ *Leitura rápida: ~3 min - Leitura completa: ~7 min*
+
 # 🎫 Support Ticket API
 
 API REST para gerenciamento de tickets de suporte, com autenticação, controle de acesso por papel, comentários, histórico de status e regras de negócio realistas.

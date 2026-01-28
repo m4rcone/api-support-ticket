@@ -27,6 +27,10 @@ describe('GET /api/v1/tickets', () => {
       new ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
       }),
     );
     app.useGlobalFilters(new HttpErrorHandler());

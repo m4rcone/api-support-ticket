@@ -15,13 +15,19 @@ import { TicketCommentsService } from './ticket-comments.service';
 import { CreateTicketCommentDto } from './dtos/create-ticket-comment.dto';
 import { TicketCommentResponseDto } from './dtos/ticket-comment-response.dto';
 import { mapTicketCommentToResponseDto } from './ticket-comments.mapper';
+import { ApiCookieAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
-@Controller('tickets')
+@ApiTags('TicketComments')
+@ApiCookieAuth('accessToken')
+@Controller('tickets/:id/comments')
 @UseGuards(JwtAuthGuard)
 export class TicketCommentsController {
   constructor(private readonly ticketCommentsService: TicketCommentsService) {}
 
-  @Post(':id/comments')
+  @ApiOkResponse({
+    type: TicketCommentResponseDto,
+  })
+  @Post()
   @HttpCode(HttpStatus.CREATED)
   async createComment(
     @Req() req: AuthenticatedRequest,
@@ -39,7 +45,11 @@ export class TicketCommentsController {
     return mapTicketCommentToResponseDto(comment);
   }
 
-  @Get(':id/comments')
+  @Get()
+  @ApiOkResponse({
+    type: TicketCommentResponseDto,
+    isArray: true,
+  })
   @HttpCode(HttpStatus.OK)
   async listComments(
     @Req() req: AuthenticatedRequest,

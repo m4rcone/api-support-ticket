@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -19,7 +18,10 @@ import { mapUserToResponseDto } from '../users/users.mapper';
 import { AssignTicketDto } from './dtos/assign-ticket.dto';
 import { TicketsService } from '../tickets/tickets.service';
 import { TicketResponseDto } from '../tickets/dtos/ticket-response.dto';
+import { ApiCookieAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Admin')
+@ApiCookieAuth('accessToken')
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
@@ -28,12 +30,9 @@ export class AdminController {
     private readonly ticketsService: TicketsService,
   ) {}
 
-  @Get()
-  @Roles(UserRole.ADMIN)
-  get() {
-    return 'OK';
-  }
-
+  @ApiOkResponse({
+    type: UserResponseDto,
+  })
   @Patch('users/:id/role')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN)
@@ -46,6 +45,9 @@ export class AdminController {
     return mapUserToResponseDto(user);
   }
 
+  @ApiOkResponse({
+    type: TicketResponseDto,
+  })
   @Patch('tickets/:id/assign')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN)

@@ -21,12 +21,18 @@ import { ListTicketsQueryDto } from './dtos/list-tickets-query.dto';
 import { UpdateTicketStatusDto } from './dtos/update-ticket-status.dto';
 import { TicketStatusHistoryResponseDto } from './status-history/dtos/ticket-status-history-response.dto';
 import { mapTicketStatusHistoryToResponseDto } from './status-history/ticket-status-history.mapper';
+import { ApiCookieAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Tickets')
+@ApiCookieAuth('accessToken')
 @Controller('tickets')
 @UseGuards(JwtAuthGuard)
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
+  @ApiOkResponse({
+    type: TicketResponseDto,
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createTicket(
@@ -43,6 +49,10 @@ export class TicketsController {
     return mapTicketToResponseDto(newTicket);
   }
 
+  @ApiOkResponse({
+    type: TicketResponseDto,
+    isArray: true,
+  })
   @Get()
   @HttpCode(HttpStatus.OK)
   async listTickets(
@@ -59,14 +69,23 @@ export class TicketsController {
     return tickets.map(mapTicketToResponseDto);
   }
 
+  @ApiOkResponse({
+    type: TicketResponseDto,
+  })
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getTicket(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+  async getTicket(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ): Promise<TicketResponseDto> {
     const ticketFound = await this.ticketsService.findOneById(id, req.user);
 
     return mapTicketToResponseDto(ticketFound);
   }
 
+  @ApiOkResponse({
+    type: TicketResponseDto,
+  })
   @Patch(':id/status')
   @HttpCode(HttpStatus.OK)
   async updateTicketStatus(
@@ -83,6 +102,10 @@ export class TicketsController {
     return mapTicketToResponseDto(updatedTicket);
   }
 
+  @ApiOkResponse({
+    type: TicketStatusHistoryResponseDto,
+    isArray: true,
+  })
   @Get(':id/status-history')
   @HttpCode(HttpStatus.OK)
   async getTicketStatusHistory(

@@ -1,313 +1,225 @@
 # 🎫 Support Ticket API
 
-API REST para sistema de gerenciamento de tickets de suporte, desenvolvida com NestJS, TypeScript e PostgreSQL.
+API REST para gerenciamento de tickets de suporte, com autenticação, controle de acesso por papel, comentários, histórico de status e regras de negócio realistas.
 
-## 📋 Sobre o Projeto
-
-Sistema completo de gerenciamento de tickets de suporte com autenticação JWT, autorização baseada em roles (RBAC) e funcionalidades específicas para diferentes tipos de usuários.
-
-### Funcionalidades Principais
-
-- ✅ **Autenticação JWT** com cookies HTTP-only
-- 👥 **3 tipos de usuários**: Customer, Agent, Admin
-- 🎫 **Gestão completa de tickets** (criar, listar, atribuir, filtrar)
-- 🔐 **Autorização baseada em roles** (RBAC)
-- 🏷️ **Tags e status de tickets** (Bug, Feature, Question, Improvement)
-- 📊 **Health check** da aplicação
-- 🔒 **Segurança**: bcrypt para senhas, validação de dados, proteção contra ataques
-
-### Roles e Permissões
-
-| Role     | Permissões                                                  |
-| -------- | ----------------------------------------------------------- |
-| CUSTOMER | Criar tickets, visualizar seus próprios tickets             |
-| AGENT    | Visualizar tickets atribuídos, atualizar status             |
-| ADMIN    | Todas as permissões + atribuir tickets + gerenciar usuários |
-
-## 🚀 Tecnologias
-
-- **[NestJS](https://nestjs.com/)** - Framework Node.js progressivo
-- **[TypeScript](https://www.typescriptlang.org/)** - Linguagem tipada
-- **[PostgreSQL](https://www.postgresql.org/)** - Banco de dados relacional
-- **[Passport JWT](https://www.passportjs.org/)** - Autenticação
-- **[node-pg-migrate](https://salsita.github.io/node-pg-migrate/)** - Migrations
-- **[Jest](https://jestjs.io/)** - Testes E2E
-- **[Docker Compose](https://docs.docker.com/compose/)** - Containerização
-
-## 📁 Estrutura do Projeto
-
-```
-api-support-ticket/
-├── src/
-│   ├── admin/                   # Módulo de administração
-│   ├── auth/                    # Autenticação e autorização
-│   ├── infra/                   # Infraestrutura
-│   │   ├── crypto/              # Hashing de senhas
-│   │   ├── database/            # Database service e migrations
-│   │   └── scripts/             # Scripts utilitários
-│   ├── status/                  # Health check
-│   ├── tickets/                 # Gestão de tickets
-│   ├── users/                   # Gestão de usuários
-│   ├── app.module.ts
-│   └── main.ts
-├── tests/
-│   ├── api/v1/                  # Testes E2E por endpoint
-│   └── utils/                   # Helpers de teste
-├── compose.yaml                 # Docker Compose config
-└── package.json
-```
-
-## 🛠️ Instalação
-
-### Pré-requisitos
-
-- Node.js 18+
-- Docker e Docker Compose
-- npm ou yarn
-
-### Setup
-
-1. **Clone o repositório**
-
-```bash
-git clone <repository-url>
-cd api-support-ticket
-```
-
-2. **Instale as dependências**
-
-```bash
-npm install
-```
-
-3. **Configure as variáveis de ambiente**
-
-```bash
-cp .env.example .env
-```
-
-Edite o arquivo `.env` conforme necessário:
-
-```env
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=local_user
-POSTGRES_DB=local_db
-POSTGRES_PASSWORD=local_password
-DATABASE_URL=postgres://local_user:local_password@localhost:5432/local_db
-
-JWT_SECRET=jwt_secret_key
-
-ADMIN_NAME=Admin
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=admin123
-```
-
-4. **Inicie os serviços (PostgreSQL)**
-
-```bash
-npm run services:up
-```
-
-5. **Execute as migrations**
-
-```bash
-npm run migrations:up
-```
-
-6. **Seed do usuário admin (opcional)**
-
-```bash
-npm run db:seed:admin
-```
-
-## 🏃 Executando a Aplicação
-
-### Desenvolvimento
-
-```bash
-npm run start:dev
-```
-
-A aplicação estará disponível em `http://localhost:3000`
-
-### Produção
-
-```bash
-npm run build
-npm run start
-```
-
-## 🧪 Testes
-
-### Executar todos os testes E2E
-
-```bash
-npm test
-```
-
-### Modo watch (desenvolvimento)
-
-```bash
-npm run test:watch
-```
-
-### Coverage
-
-```bash
-npm run test:cov
-```
-
-## 📡 API Endpoints
-
-### Base URL
-
-```
-http://localhost:3000/api/v1
-```
-
-### Autenticação
-
-| Método | Endpoint      | Descrição        | Auth Required |
-| ------ | ------------- | ---------------- | ------------- |
-| POST   | `/auth/login` | Login de usuário | ❌            |
-
-### Usuários
-
-| Método | Endpoint | Descrição          | Auth Required | Roles |
-| ------ | -------- | ------------------ | ------------- | ----- |
-| POST   | `/users` | Criar novo usuário | ❌            | -     |
-
-### Tickets
-
-| Método | Endpoint       | Descrição            | Auth Required | Roles |
-| ------ | -------------- | -------------------- | ------------- | ----- |
-| GET    | `/tickets`     | Listar tickets       | ✅            | All   |
-| POST   | `/tickets`     | Criar ticket         | ✅            | All   |
-| GET    | `/tickets/:id` | Buscar ticket por ID | ✅            | All   |
-
-### Admin
-
-| Método | Endpoint                    | Descrição                 | Auth Required | Roles |
-| ------ | --------------------------- | ------------------------- | ------------- | ----- |
-| PATCH  | `/admin/tickets/:id/assign` | Atribuir ticket a agente  | ✅            | ADMIN |
-| PATCH  | `/admin/users/:id/role`     | Atualizar role de usuário | ✅            | ADMIN |
-
-### Status
-
-| Método | Endpoint  | Descrição    | Auth Required |
-| ------ | --------- | ------------ | ------------- |
-| GET    | `/status` | Health check | ❌            |
-
-## 🗄️ Database Scripts
-
-### Criar nova migration
-
-```bash
-npm run migrations:create <nome-da-migration>
-```
-
-### Executar migrations
-
-```bash
-npm run migrations:up
-```
-
-### Gerenciar serviços Docker
-
-```bash
-# Iniciar PostgreSQL
-npm run services:up
-
-# Parar serviços
-npm run services:stop
-
-# Remover containers
-npm run services:down
-```
-
-## 🔧 Scripts Disponíveis
-
-| Script                  | Descrição                          |
-| ----------------------- | ---------------------------------- |
-| `npm run start:dev`     | Inicia app em modo desenvolvimento |
-| `npm run build`         | Build da aplicação                 |
-| `npm test`              | Executa testes E2E                 |
-| `npm run test:watch`    | Executa testes em modo watch       |
-| `npm run format`        | Formata código com Prettier        |
-| `npm run lint`          | Lint e correção com ESLint         |
-| `npm run db:seed:admin` | Cria usuário admin no banco        |
-
-## 🏗️ Arquitetura
-
-### Padrões Utilizados
-
-- **Modular Architecture** - Separação por features/domínios
-- **Repository Pattern** - Abstração da camada de dados
-- **DTO Pattern** - Validação e transformação de dados
-- **Guard Pattern** - Autenticação e autorização
-- **Mapper Pattern** - Conversão entre tipos de dados
-
-### Validação e Segurança
-
-- ✅ **class-validator** - Validação de DTOs
-- ✅ **class-transformer** - Transformação de dados
-- ✅ **bcryptjs** - Hash seguro de senhas
-- ✅ **Passport JWT** - Tokens seguros
-- ✅ **Cookie HTTP-only** - Proteção contra XSS
-- ✅ **Global Error Handler** - Tratamento centralizado de erros
-
-## 📝 Exemplos de Uso
-
-### Login
-
-```bash
-curl -X POST http://localhost:3000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@example.com",
-    "password": "admin123"
-  }'
-```
-
-### Criar Ticket
-
-```bash
-curl -X POST http://localhost:3000/api/v1/tickets \
-  -H "Content-Type: application/json" \
-  -H "Cookie: access_token=<seu-token>" \
-  -d '{
-    "title": "Bug no sistema",
-    "description": "Descrição detalhada do problema",
-    "tag": "BUG"
-  }'
-```
-
-### Listar Tickets com Filtros
-
-```bash
-curl "http://localhost:3000/api/v1/tickets?status=OPEN&tag=BUG&page=1&perPage=10" \
-  -H "Cookie: access_token=<seu-token>"
-```
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Por favor, siga estas etapas:
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença UNLICENSED - veja o arquivo LICENSE para detalhes.
-
-## 👤 Autor
-
-Desenvolvido com ❤️ por [Seu Nome]
+Projeto desenvolvido com foco em **boas práticas de backend**, **arquitetura modular**, **testes E2E completos** e **segurança**.
 
 ---
 
-⭐ Se este projeto foi útil, considere dar uma estrela!
+## 📌 Visão Geral
+
+Esta API permite que usuários criem tickets de suporte, acompanhem seu andamento, adicionem comentários e que administradores façam a gestão completa dos tickets e dos papéis de usuários.
+
+O sistema implementa **RBAC (Role-Based Access Control)** com três papéis:
+
+- **CUSTOMER** – cria e acompanha seus próprios tickets
+- **AGENT** – atua nos tickets atribuídos a ele
+- **ADMIN** – possui acesso total ao sistema
+
+---
+
+## 🧱 Arquitetura
+
+- **Framework:** NestJS
+- **Banco de dados:** PostgreSQL
+- **Migrations:** node-pg-migrate
+- **Autenticação:** JWT via **cookie HttpOnly**
+- **Documentação:** OpenAPI (Swagger)
+- **Testes:** Jest + Supertest (E2E)
+
+Arquitetura modular, com separação clara entre:
+
+- Controllers (camada HTTP)
+- Services (regras de negócio)
+- Repositories (acesso a dados)
+- DTOs / Mappers
+- Infra (database, crypto, errors)
+- Error handling centralizado
+
+---
+
+## 🔐 Autenticação e Segurança
+
+- Login via `POST /api/v1/auth/login`
+- JWT armazenado em **cookie HttpOnly**
+- Nenhum token é exposto ao frontend via JavaScript
+- Proteção contra acesso não autorizado
+
+---
+
+## 👥 Usuários e Papéis (roles)
+
+### Criação de usuários
+
+- Endpoint público
+- Validações completas (email, senha, duplicidade, etc.)
+
+### Administração de papéis
+
+- Apenas **ADMIN** pode alterar papéis
+- Regra crítica:
+  - ❌ não é permitido remover o papel do **último ADMIN** do sistema
+
+---
+
+## 🎟️ Tickets
+
+### Criação
+
+- Usuários autenticados criam tickets
+- Campos obrigatórios validados
+
+### Listagem
+
+`GET /tickets`
+
+Comportamento por papel:
+
+- **CUSTOMER** → apenas tickets criados por ele
+- **AGENT** → apenas tickets atribuídos a ele
+- **ADMIN** → todos os tickets
+
+Suporte a:
+
+- filtros (`status`, `tag`)
+- paginação (`limit`, `offset`)
+
+### Consulta por ID
+
+- Restrições de acesso baseadas no papel e relacionamento com o ticket
+
+---
+
+## 🔄 Status do Ticket
+
+Estados possíveis:
+
+- `OPEN`
+- `IN_PROGRESS`
+- `RESOLVED`
+- `CLOSED`
+
+### Regras de transição
+
+- **CUSTOMER:** pode fechar e reabrir seus próprios tickets (OPEN ↔ CLOSED)
+- **AGENT:** pode avançar o fluxo de tickets atribuídos (OPEN → IN_PROGRESS → RESOLVED)
+- **ADMIN:** pode alterar qualquer ticket
+
+Transições inválidas são bloqueadas com erro.
+
+---
+
+## 🕒 Histórico de Status
+
+- Toda mudança de status gera um registro em `ticket_status_history`
+- Endpoint:
+  - `GET /tickets/:id/status-history`
+- Controle de acesso igual ao ticket
+- Permite auditoria completa do ciclo de vida do ticket
+
+---
+
+## 💬 Comentários
+
+### Adicionar comentário
+
+`POST /tickets/:id/comments`
+
+Regras de acesso:
+
+- **CUSTOMER** → apenas no próprio ticket
+- **AGENT** → apenas em ticket atribuído
+- **ADMIN** → qualquer ticket
+
+### Listar comentários
+
+`GET /tickets/:id/comments`
+
+- Ordenados por data de criação
+- Retorna lista vazia quando não houver comentários
+- Ticket inexistente retorna **404**
+
+---
+
+## 🧪 Testes
+
+O projeto possui **cobertura E2E completa**, validando:
+
+- Autenticação
+- Controle de acesso por papel
+- Regras de negócio
+- Casos de erro
+- Fluxos reais de uso
+
+Exemplos de testes implementados:
+
+- Criação de usuários com validações
+- Login com validações
+- Criação e listagem de tickets
+- Atribuição de tickets
+- Atualização de status com regras
+- Histórico de status
+- Comentários (criação e listagem)
+- Proteções contra acesso indevido
+
+São `82` testes E2E no total.
+Todos os testes passam isoladamente com banco limpo a cada execução.
+Possui um `orchestrator` para gerenciar o banco de dados e facilitar a escrita dos testes.
+
+---
+
+## 📖 Documentação da API (Swagger)
+
+A API é documentada via OpenAPI.
+
+Após subir o projeto, acesse: `http://localhost:3000/`
+
+É possível:
+
+- Fazer login pelo Swagger
+- Testar endpoints protegidos (cookie é reutilizado automaticamente)
+- Visualizar contratos de request/response
+
+Importante rodar o script `db:seed:admin` para criar um usuário ADMIN inicial e conseguir acessar os endpoints protegidos.
+
+---
+
+## 🚀 Como rodar o projeto
+
+### Pré-requisitos
+
+- Node.js
+- Docker + Docker Compose
+
+### Subir o projeto
+
+```bash
+git clone <url-do-repositorio>
+cd <nome-do-projeto>
+
+cp .env.example .env # ajuste as variáveis de ambiente conforme necessário
+
+npm install
+npm run start:dev
+```
+
+O script irá subir o serviço (Postgres), aplicar migrations e rodar o servidor em modo `--watch`.
+
+### Testes E2E
+
+```bash
+npm run test:watch
+npm run test
+```
+
+Recomendo rodar em modo `--watch` para obter detalhe dos testes.
+O script `test` está preparado para rodar em CI/CD.
+
+## 🧠 Objetivo do Projeto
+
+Este projeto foi desenvolvido com foco em:
+
+- Demonstrar domínio de backend moderno
+- Aplicar boas práticas de mercado
+- Servir como projeto de portfólio
+- Simular um sistema de suporte funcional e auditável

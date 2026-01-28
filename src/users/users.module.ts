@@ -9,5 +9,6 @@ import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
   imports: [DatabaseModule],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository, PasswordHasherService],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}

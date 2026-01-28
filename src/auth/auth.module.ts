@@ -4,9 +4,6 @@ import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
 import { AuthController } from './auth.controller';
-import { UsersService } from '../users/users.service';
-import { UsersRepository } from '../users/users.repository';
-import { DatabaseService } from '../infra/database/database.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -28,15 +25,7 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    UsersService,
-    UsersRepository,
-    DatabaseService,
-    AuthService,
-    PasswordHasherService,
-    JwtStrategy,
-    JwtAuthGuard,
-  ],
+  providers: [AuthService, PasswordHasherService, JwtStrategy, JwtAuthGuard],
   exports: [AuthService],
 })
 export class AuthModule {}

@@ -1,23 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
-import { UsersService } from '../users/users.service';
-import { UsersRepository } from '../users/users.repository';
-import { PasswordHasherService } from '../infra/crypto/password-hasher.service';
-import { DatabaseService } from '../infra/database/database.service';
-import { TicketsService } from '../tickets/tickets.service';
-import { TicketsRepository } from '../tickets/tickets.repository';
-import { TicketStatusHistoryRepository } from 'src/tickets/status-history/ticket-status-history.repository';
+import { UsersModule } from 'src/users/users.module';
+import { TicketsModule } from 'src/tickets/tickets.module';
 
 @Module({
+  imports: [UsersModule, TicketsModule],
   controllers: [AdminController],
-  providers: [
-    DatabaseService,
-    UsersService,
-    UsersRepository,
-    PasswordHasherService,
-    TicketsService,
-    TicketsRepository,
-    TicketStatusHistoryRepository,
-  ],
 })
 export class AdminModule {}
